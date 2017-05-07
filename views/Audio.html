@@ -1,0 +1,461 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />		
+		<style type="text/css">
+			.rp{
+				position: fixed;
+				top:0;
+				left:0;
+				width:100%;
+				height:100%;
+				z-index: 1000;
+				background: rgba(0,0,0,0.7);
+				text-align: center;
+				z-index: 9999;
+				overflow: hidden;
+				display: none;
+			}
+			.ptime{
+				margin-top: 40%;
+				font-size: 22px;
+				color: #FFFFFF;
+			}
+			.rtime{
+				font-size: 22px;
+				color: #FF0000;
+			}
+			.progress{
+				width: 90%;
+			   	background-color: #666;
+			  	margin: 0 5%;
+			  	border: 1px solid #222;
+			  	-webkit-border-radius: 5px;
+			  	border-radius: 5px;
+			}
+			.rprogress{
+				background-color: rgba(0,0,0,0);
+			    border: 5px solid rgba(0,183,229,0.9);
+			    opacity: .9;
+			    border-left: 5px solid rgba(0,0,0,0);
+			    border-right: 5px solid rgba(0,0,0,0);
+			    border-radius: 50px;
+			    box-shadow: 0 0 15px #2187e7;
+			    width: 36px;
+			    height: 36px;
+			    margin: 0 auto;
+			    -webkit-animation: spin 1s infinite linear;
+			    animation: spin 1s infinite linear;
+			}
+			@-webkit-keyframes spin {
+			    0% {
+			        -webkit-transform: rotate(0deg);
+			    }
+			    100% {
+			        -webkit-transform: rotate(360deg);
+			    }
+			}
+			@keyframes spin {
+			    0% {
+			        transform: rotate(0deg);
+			    }
+			    100% {
+			        transform: rotate(360deg);
+			    }
+			}
+			.schedule {
+			  width: 8px;
+			  height: 8px;
+			  margin: 1px 0;
+			  background-color: #FFCC33;
+			  -webkit-border-radius: 4px;
+			  border-radius: 4px;
+			  -webkit-transition: all 1s linear;
+			  transition: all 1s linear;
+			}
+			.stop{
+				width: 72px;
+				height: 72px;
+				background: url(../img/astop.png) center center;
+				background-size: 72px 72px;
+				margin: auto;
+				-webkit-border-radius: 72px;
+				border-radius: 72px;
+			}
+			.stop:active{
+			  	-webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5) inset;
+				box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5) inset;
+			}
+			.aname {
+				font-size: 16px;
+			}
+			.ainf {
+				font-size: 12px;
+			}
+			.clearBtn{
+				margin-bottom:100px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Audio</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="startRecord()">开始录音</button>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="startPlay('_www/audio/friendship.mp3')">播放音乐</button>
+			<ul id="audioHistory" class="mui-table-view" style="margin: 15px 0;">
+				 <li id="empty" class="mui-table-view-cell">
+		            <a>
+		                	无历史记录
+		            </a>
+		        </li>
+			</ul>
+			<button type="button" class="mui-btn mui-btn-grey mui-btn-block clearBtn" onclick="clearAudio()">清空历史记录</button>
+		</div>
+		<!--底部输出说明文字-->
+		<div class="bottomOutput">
+			Audio用于管理音频设备，可调用麦克风录制音频文件，也可播放音频文件。
+		</div>
+		
+		<!--播放遮罩-->
+		<div id="play" class="rp">
+			<div id="ptime" class="ptime">00:00:00/00:00:00</div><br/>
+			<div id="progress" class="progress"><div id="schedule" class="schedule"></div></div>
+			<br/>
+			<div class="stop" onclick="stopPlay()"></div>
+		</div>
+		
+		<!--录音遮罩-->
+		<div id="record" class="rp">
+			<div style="width:100%;height:20%;"></div>
+			<div class="rprogress"><div class="rschedule"></div></div>
+			<br/>
+			<div id="rtime" class="rtime">00:00:00</div><br/>
+			<div class="stop" onclick="stopRecord()"></div>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			//公用函数
+			// 格式化日期时间字符串，格式为"YYYY-MM-DD HH:MM:SS"
+			var dateToStr=function(d){
+				return (d.getFullYear()+"-"+ultZeroize(d.getMonth()+1)+"-"+ultZeroize(d.getDate())+" "+ultZeroize(d.getHours())+":"+ultZeroize(d.getMinutes())+":"+ultZeroize(d.getSeconds()));
+			};
+			/**
+			 * 设置数字的位数
+			 * zeroize value with length(default is 2).
+			 * @param {Object} v
+			 * @param {Number} l
+			 * @return {String} 
+			 */
+			var ultZeroize=function(v,l){
+				var z="";
+				l=l||2;
+				v=String(v);
+				for(var i=0;i<l-v.length;i++){
+					z+="0";
+				}
+				return z+v;
+			};
+			// 格式化时长字符串，格式为"HH:MM:SS"
+			var timeToStr=function(ts){
+				if(isNaN(ts)){
+					return "--:--:--";
+				}
+				var h=parseInt(ts/3600);
+				var m=parseInt((ts%3600)/60);
+				var s=parseInt(ts%60);
+				return (ultZeroize(h)+":"+ultZeroize(m)+":"+ultZeroize(s));
+			};
+		</script>
+		<script type="text/javascript">
+			//在底部输出提示信息
+			function setInfo(content){
+				mui('.bottomOutput')[0].innerHTML = content;
+			}
+			mui.init();
+			
+			
+			var gentry=null,//获取到的目录对象
+				bUpdated = false;//用于兼容可能提前注入导致DOM未解析完更新的问题
+			mui.plusReady(function(){
+				//进入页面时，先 获取audio目录中的音频对象，并将获取的对象显示到list列表中
+				plus.io.resolveLocalFileSystemURL('_doc',function(enntry){
+					enntry.getDirectory('audio',{create:true},function(entry){
+						gentry = entry;
+						updateHistory();
+					},function(e){
+						setInfo('Get directory "audio" failed: '+e.message);
+					})
+				},function(e){
+					outSet('Resolve "_doc/" failed: '+e.message);
+				})
+			})
+			
+			var els = {
+				playEl:mui('#play')[0],//播放弹层
+				recordEl:mui('#record')[0],//录音弹层
+				recordItemList:mui('#audioHistory')[0],//存放记录的列表容器元素
+				emptyEl:mui('#empty')[0],//没有录音记录时显示的空提示元素
+				rtimeEl:mui('#rtime')[0],//录音弹框中记录时间容器元素
+				progressEl:mui('#progress')[0],//播放弹框中的进度条元素
+				ptimeEl:mui('#ptime')[0],//播放弹框中记录时间容器元素
+				progressInnerEl:mui('#schedule')[0],//放弹框中的进度条内部的进度元素
+				
+			}
+			
+			function updateHistory(){
+				if(bUpdated||!gentry||!document.body){//兼容可能提前注入导致DOM未解析完更新的问题
+					return;
+				}
+				//创建目录读取对象reader
+			  	var reader = gentry.createReader();
+			  	//readEntries: 获取当前目录中的所有文件和子目录
+			  	reader.readEntries(function(entries){
+			  		//entries文件或目录对象的引用，可指向文件或目录对象
+			  		for(var i in entries){
+			  			if(entries[i].isFile){//isFile操作对象的是否为文件
+			  				//将获取到的文件添加到 list 列表中
+			  				createItem(entries[i]);
+			  			}
+			  		}
+			  	}, function(e){
+			  		outLine('读取录音列表失败：'+e.message);
+			  	});
+				bUpdated = true;
+			}
+			
+			
+			//录音完成时，间录音信息添加到列表中
+			function createItem(entry){
+				//创建li选项，并插入到列表容器中
+				var li = document.createElement('li');
+				li.className = 'mui-table-view-cell';
+				li.innerHTML = '<a class="iplay"><font class="aname"></font><br/><font class="ainf"></font></a>';
+				li.setAttribute('onclick', 'playAudio(this)');
+				els.recordItemList.insertBefore(li, els.emptyEl.nextSibling);
+				
+				//将文件信息添加到li内容和属性中
+				li.querySelector('.aname').innerText = entry.name;
+				li.querySelector('.ainf').innerText = '...';
+				li.entry = entry;
+				
+				//判断li 或者entry是否存在
+				if(!li || !entry){
+					return;
+				}
+				//获取文件或目录的属性信息并添加到li中
+				entry.getMetadata(function(metadata){
+					//metada 为JSON对象，保存文件或目录的状态信息对象{modification,size,fileCount,directoryCount}
+					//此处是将文件最后修改信息 添加到li中
+					li.querySelector('.ainf').innerText = dateToStr(metadata.modificationTime);
+				}, function(e){
+					setInfo('获取文件"'+entry.name+'"信息失败：'+e.message);
+				});
+				
+				// 设置空项不可见
+				els.emptyEl.style.display = 'none';
+			}
+			
+			//开始录音
+			var recorder,//录音对象
+				t = 0, //录音的时长，秒数
+				timer = null; //录音的定时器对象
+			function startRecord(){
+				setInfo('开始录音');		
+				
+				//获取当前设备的录音对象 recorder
+				recorder = plus.audio.getRecorder();
+				if(recorder == null){
+					setInfo('录音对象获取失败')
+					return;
+				}
+				
+				//record获取当前设备的录音对象
+				recorder.record({
+					filename:'_doc/audio/' 
+					//filename: (String 类型 )保存录音文件的路径
+				},function(recordFile){
+					setInfo('录音完成：'+recordFile);
+					
+					//resolveLocalFileSystemURL：通过URL参数获取目录对象或文件对象
+					plus.io.resolveLocalFileSystemURL(recordFile,function(entry){
+						//entry ：请求到的目录或文件对象
+						//将录音文件添加到列表中
+						createItem(entry);
+					},function(e){
+						setInfo('读取录音文件错误：'+e.message);
+					})
+				},function(e){
+					setInfo('录音失败：'+e.message)
+				});
+				
+				//打开录音弹层
+				els.recordEl.style.display = 'block';
+				
+				//每隔1s 更新录音时间
+				t = 0;
+				timer = setInterval(function(){
+					t++;
+					els.rtimeEl.innerText = timeToStr(t);
+				}, 1000);
+			}
+			//停止录音
+			function stopRecord(){
+				setInfo('停止录音');				
+				
+				//隐藏录音弹层
+				els.recordEl.style.display = 'none';
+				
+				//将录音弹层中的时间重置为 ：'00:00:00';
+				els.rtimeEl.innerText = '00:00:00';
+				
+				//清除定时器
+				clearInterval(timer);
+				timer = null;
+				
+				//结束录音操作
+				recorder.stop();
+				
+				//录音对象 recorder
+				recorder = null;
+				
+				//重置录音的总秒数 t
+				t = 0;				
+			}
+			
+			//播放录音
+			var player=null,//音频播放文件
+				ptimer=null;// 定时器
+			function playAudio(li){
+				if(!li || !li.entry){
+					setInfo('无效的音频文件');
+					return;
+				}
+				setInfo('播放音频文件：'+li.entry.name);
+				//调用播放函数
+				startPlay('_doc/audio/'+li.entry.name);
+			}
+			//将播放操作封装成函数，以便在其他地方调用
+			function startPlay(url){
+				//打开播放弹层
+				els.playEl.style.display = 'block';
+				
+				//获取进度条宽度
+				var progressW = els.progressEl.clientWidth;
+				
+				//创建音频播放对象
+				player = plus.audio.createPlayer(url);
+				
+				//开始播放音频
+				player.play(function(){
+					setInfo('播放完成！');
+					
+					// 播放完成
+					//设置播放弹层中显示的时间
+					els.ptimeEl.innerText = timeToStr(allTime)+'/'+timeToStr(allTime);
+					//设置进度条的进度为100%
+					els.progressInnerEl.style.webkitTransition = 'all 0.3s linear';
+					els.progressInnerEl.style.width = progressW+'px';
+					
+					//调用停止播放函数
+					stopPlay();
+					
+				},function(e){
+					setInfo('播放音频文件"'+url+'"失败：'+e.message);
+				});
+				
+				// 获取总时长，获取音频流的总长度
+				var allTime = player.getDuration();				
+				if(!allTime){
+					els.ptimeEl.innerText = '00:00:00/'+timeToStr(allTime);
+				}
+				
+				//每隔1s更新一次播放时间
+				ptimer = setInterval(function(){
+					if(!allTime){// 兼容无法及时获取总时长的情况
+						allTime = player.getDuration();	
+					}
+					
+					//获取音频流当前播放的位置
+					var curPoisition = player.getPosition();
+					if(!curPoisition){  // 兼容无法及时获取当前播放位置的情况
+						return;
+					}
+					//设置播放时间
+					els.ptimeEl.innerText = timeToStr(curPoisition)+'/'+timeToStr(allTime);
+					
+					//获取当前进度条的进度，并将进度赋值为width
+					var progressInnerCurrentW = Math.round(progressW*curPoisition/allTime);
+					if(progressInnerCurrentW < 8){
+						progressInnerCurrentW = 8;
+					}
+					els.progressInnerEl.style.width = progressInnerCurrentW+'px';
+				},1000)
+			}
+			//停止播放
+			function stopPlay(){
+				//清空定时器
+				clearInterval(ptimer);
+				ptimer = null;
+				
+				//重置播放页面
+				setTimeout(function(){
+					els.playEl.style.display = 'none';
+					els.progressInnerEl.style.width = '8px';
+					els.progressInnerEl.style.webkitTransition = 'all 1s linear';
+					els.ptimeEl.innerText = '00:00:00/00:00:00';	
+				},500);
+				
+				// 操作播放对象
+				if(player){
+					player.stop();
+					player=null;
+				}
+				
+				setInfo('停止播放');
+				
+			}
+			
+			//清除历史
+			function clearAudio(){
+				setInfo('清除历史');
+				els.recordItemList.innerHTML = '<li id="empty" class="mui-table-view-cell"><a>无历史记录 </a></li>';
+				els.emptyEl = document.getElementById('empty');
+				// 删除音频文件
+				setInfo('清空录音历史记录：');
+				//removeRecursively: 递归删除目录
+				gentry.removeRecursively(function(entries){
+					setInfo('操作成功！');				
+				}, function(e){
+					setInfo('操作失败：'+e.message);
+				});
+			}
+			
+			//备份mui.back，mui.back已将窗口关闭逻辑封装的比较完善（预加载及父子窗口），因此最好复用mui.back
+			var old_back = mui.back;
+			mui.back = function(){
+				// 停止播放
+				if(els.playEl.style.display == 'block'){
+					stopPlay();
+				}else if(els.recordEl.style.display == 'block'){
+					stopRecord();
+				}else{
+					//执行mui封装好的窗口关闭逻辑；
+			    	old_back();
+				}		    	
+			}
+			
+			
+		</script>
+	</body>
+
+</html>

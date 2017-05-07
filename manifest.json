@@ -208,7 +208,8 @@
 					"css/mui.min.css"
 				],
 				"refer": [
-					"views/Accelerometer.html"
+					"views/Accelerometer.html",
+					"views/Audio.html"
 				],
 				"priority": 0
 			},
@@ -235,6 +236,17 @@
 					"fonts/mui.ttf",
 					"img/shake/3.jpg",
 					"img/shake/4.jpg"
+				],
+				"refer": [],
+				"priority": 0
+			},
+			"views/Audio.html": {
+				"resources": [
+					"css/common.css",
+					"js/mui.min.js",
+					"css/mui.min.css",
+					"fonts/mui.ttf",
+					"img/astop.png"
 				],
 				"refer": [],
 				"priority": 0
