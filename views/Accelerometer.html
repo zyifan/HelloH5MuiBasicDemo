@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../css/common.css"/>
+	</head>
+
+	<body>
+		<!--<header class="mui-bar mui-bar-nav">
+		  <a class="mui-icon mui-icon-left-nav mui-pull-left mui-action-back"></a>
+		  <h1 class="mui-title">Accelerometer</h1>
+		</header>-->
+		
+		<div class="mui-content mui-content-padded">
+		    <button type="button" class=" mui-btn-block  mui-btn-yellow acc-btn" onclick="openShake()">摇一摇</button>
+		    <ul class="mui-table-view acc-list">
+	            <li class="mui-table-view-cell" id="accGetSpeed">
+	                <a>
+	                    	获取设备当前加速度
+	                </a>
+	            </li>
+	            <li class="mui-table-view-cell" id="accWatchSpeed">
+	                <a>
+	                     	监听设备加速度变化 
+	                </a>
+	            </li>
+	            <li class="mui-table-view-cell" id="accStopWatchSpeed">
+	                <a>
+	                     	停止监听设备加速度变化
+	                </a>
+	            </li>
+	        </ul>
+		</div>
+		<nav class="mui-bar mui-bar-tab acc-footer">
+            <a class="mui-tab-item mui-active">
+                <span class="mui-tab-label" id="accContent"></span>
+            </a>	            
+        </nav>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				swipeBack:true //启用右滑关闭功能
+			})
+			mui.plusReady(function(){
+				var content = mui('#accContent')[0];
+				var wid = null;
+				//获当前取加速度
+				mui('#accGetSpeed').on('tap','a',function(){
+					plus.accelerometer.getCurrentAcceleration(function( acceleration){
+						content.innerHTML = '<ul><li>x轴方向的加速度: '+acceleration.xAxis+'</li><li>y轴方向的加速度: '+acceleration.yAxis+'</li><li>z轴方向的加速度: '+acceleration.zAxis+'</li></ul>';
+					},function(e){
+						console.log(e.code);
+						console.log(e.message);
+					})
+				});
+				//获监听加速度
+				mui('#accWatchSpeed').on('tap','a',function(){
+					wid = plus.accelerometer.watchAcceleration(function( acceleration){
+						content.innerHTML = '<ul><li>x轴方向的加速度: '+acceleration.xAxis+'</li><li>y轴方向的加速度: '+acceleration.yAxis+'</li><li>z轴方向的加速度: '+acceleration.zAxis+'</li></ul>';
+					},function(e){
+						console.log(e.code);
+						console.log(e.message);
+					})
+				});
+				//停止监听加速度
+				mui('#accStopWatchSpeed').on('tap','a',function(){
+					plus.accelerometer.clearWatch(wid);
+					wid = null;
+				});
+			})
+			function openShake(){
+				mui.openWindow({
+					url:'Accelerometer_shake.html',
+					id:'Accelerometer_shake.html'
+				})
+			}
+		</script>
+	</body>
+
+</html>

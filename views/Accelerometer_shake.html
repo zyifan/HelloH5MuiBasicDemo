@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body style="background: center center no-repeat url(../img/shake/1.jpg);">
+		<header class="mui-bar mui-bar-nav">
+		  <a class="mui-icon mui-icon-left-nav mui-pull-left mui-action-back"></a>
+		  <h1 class="mui-title">Accelerometer_Shake</h1>
+		</header>
+		<div style="height:100%;text-align:center;overflow:hidden;">
+			<div id="up" style="width:100%;height:50%;background:#333;-webkit-transition:all .5s ease-in-out;-ms-transition:all .5s ease-in-out;">
+				<img style="height:100%;" src="../img/shakeup.png"/>
+			</div>
+			<div id="down" style="padding-bottom:20px;width:100%;height:50%;background:#333;-webkit-transition:all .5s ease-in-out;-ms-transition:all .5s ease-in-out;">
+				<img style="height:100%;" src="../img/shakedown.png"/>
+			</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				swipeBack:true //启用右滑关闭功能
+			});
+			
+			
+			mui.plusReady(function(){
+				//锁定竖屏正方向
+				plus.screen.lockOrientation('portrait-primary');
+					
+				var p=null;//audio对象
+				var iLast=2,MAX=20; //MAX（x、y、z轴加速度总和的最大值），iLast当前背景图片的序号
+				var up=mui('#up')[0]||null,
+					down=mui('#down')[0]||null,
+					offset=up.offsetHeight/2||50;
+				var t=null;//定时器
+				// 监听加速度
+				plus.accelerometer.watchAcceleration(function(a){
+					if(!up){
+						return;
+					}
+					if(!p && ( Math.abs(a.xAxis)+Math.abs(a.yAxis)+Math.abs(a.zAxis) > MAX )){
+						// Play audio，如果晃动手机的x、y、z轴的加速度总和大于MAX=20
+						p = plus.audio.createPlayer('../audio/shake.wav');
+						p.play();
+						
+						//2秒后执行此方法，为body设置新背景，删除播放器
+						setTimeout(function(){
+							// Change background image
+							var index = Math.round(Math.random()*3+1);//取1，2，3之间的一个值
+							if ( iLast == index ) {
+								//如果当前背景图片序号等于随机取到的图片序号，则随机序号加1
+								index++;
+								if ( index > 4 ) {
+									index = 1;
+								}
+							}
+							//将随机取到的背景图片添加到body上
+							document.body.style.backgroundImage='url(../img/shake/'+index+'.jpg)';
+							//将随机图片赋值给当前背景
+							iLast = index;
+							
+							// Stop play audio，停止播放音乐
+							p.stop();
+							
+							//删除播放器，并将播放器指定为空
+							delete p;
+							p = null;
+						}, 2000 );
+						
+						// Animation，为up、down两个区域设置动画
+						offset=up.offsetHeight/2; 
+						
+						//up上移offset个距离
+						up.style.webkitTransform = 'translateY(-'+offset+'px)';
+						up.style.msTransform = 'translateY(-'+offset+'px)';
+						
+						//down下移offset的距离
+						down.style.webkitTransform = 'translateY('+offset+'px)';
+						down.style.msTransform = 'translateY('+offset+'px)';
+						
+						//如果存在t的定时器
+						if(t){
+							//清除定时器t
+							clearTimeout(t);
+						}
+						//设置定时器t，在700ms之后将up和down的移动样式清除
+						t = setTimeout(function(){
+							t = null;
+							up.style.webkitTransform = '';
+							up.style.msTransform = '';
+							down.style.webkitTransform = '';
+							down.style.msTransform = '';
+						}, 700 );
+					}
+				},function(e){
+					alert(e.code + e.message);
+				}, {frequency:100})
+			})
+		</script>
+	</body>
+
+</html>

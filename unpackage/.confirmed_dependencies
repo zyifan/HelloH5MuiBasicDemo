@@ -1,0 +1,46 @@
+{
+	"index.html": {
+		"resources": [
+			"views/list.html",
+			"js/mui.min.js",
+			"css/mui.min.css"
+		],
+		"refer": [
+			"views/list.html"
+		]
+	},
+	"views/list.html": {
+		"resources": [
+			"fonts/mui.ttf",
+			"js/mui.min.js",
+			"css/mui.min.css"
+		],
+		"refer": [
+			"views/Accelerometer.html"
+		]
+	},
+	"views/Accelerometer.html": {
+		"resources": [
+			"css/common.css",
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		],
+		"refer": [
+			"views/Accelerometer_shake.html"
+		]
+	},
+	"views/Accelerometer_shake.html": {
+		"resources": [
+			"js/mui.min.js",
+			"css/mui.min.css",
+			"img/shake/1.jpg",
+			"img/shakedown.png",
+			"img/shakeup.png",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"img/shake/3.jpg",
+			"img/shake/4.jpg"
+		]
+	}
+}
