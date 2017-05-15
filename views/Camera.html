@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Camera</h1>
+		</header>
+		
+		<div class="mui-content mui-content-padded">
+			<!--<div class="button" onclick="changeIndex();">
+				选择：<span id="display" style="color:#FF0000">主摄像头</span>
+				<div style="width:0px;height:0px;overflow:hidden;">
+					<select id="index">
+						<option value='1' selected="true">主摄像头</option>
+						<option value='2' >辅摄像头</option>
+					</select>
+				</div>
+			</div>-->
+			<button type="button" onclick="getImage()" class="mui-btn mui-btn-yellow mui-btn-block">拍照</button>
+			<button type="button" onclick="getVideo()" class="mui-btn mui-btn-yellow mui-btn-block">录像</button>
+			<ul id="history" class="mui-table-view" style="margin: 15px 0;">
+				 <li id="empty" class="mui-table-view-cell" onclick="empty()"><a>无历史记录</a></li>
+			</ul>
+			
+			<button type="button" class="mui-btn mui-btn-grey mui-btn-block clearBtn" onclick="clearScan()">清空历史记录</button>
+
+		</div>
+		
+		<!--底部输出说明文字-->
+		<div class="bottomOutput">
+			Camera管理摄像头设备，可用于拍摄照片、录制视频文件。
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			var i=1,//主、辅摄像头对应的值，1为主摄像头，2为辅摄像头
+				gentry=null,//文档目录对象
+				w=null;
+			var hl=null,//历史记录元素
+				le=null,//无历史记录元素
+				de=null,//摄像头选择（主、辅）容器元素
+				ie=null;//ie主、辅摄像头选择select元素
+			var unv=true;// 判断是否支持video标签
+			var bUpdated=false; //用于兼容可能提前注入导致DOM未解析完更新的问题
+			
+			// 监听DOMContentLoaded事件
+			document.addEventListener('DOMContentLoaded', function(){
+				// 获取DOM元素对象
+				hl=document.getElementById('history');//历史记录元素
+				le=document.getElementById('empty');//无历史记录元素
+				de=document.getElementById('display');//摄像头选择（主、辅）容器元素
+				if(ie=document.getElementById('index')){//ie主、辅摄像头选择select元素
+					ie.onchange=indexChanged;//选择发生改变时调用函数
+				}
+				// 判断是否支持video标签
+				unv=!document.createElement('video').canPlayType;
+				updateHistory();
+			},false );
+			//主、辅摄像头选择select发生改变change时调用函数			
+			function indexChanged(){
+				//将选择结果放到容器中
+				de.innerText = ie.options[ie.selectedIndex].innerText;
+				//主、辅摄像头对应的值
+				i = parseInt(ie.value);
+				//将选择的结果显示到底部固定栏中
+				outPut('.bottomOutput',de.innerText);
+			}
+			//点击切换摄像头按钮时触发的函数
+			function changeIndex(){
+				outPut('.bottomOutput','选择摄像头：');
+				ie.focus();//主、辅摄像头选择select元素自动获得焦点
+			}
+			
+			mui.plusReady(function(){
+				//进入页面，首先获取摄像头目录中的文件，并将文件添加到列表中
+				plus.io.resolveLocalFileSystemURL('_doc/', function(entry){
+					entry.getDirectory('camera', {create:true}, function(dir){
+						gentry = dir;
+						updateHistory();
+					}, function(e){
+						outPut('.bottomOutput','Get directory "camera" failed: '+e.message);
+					} );
+				}, function(e){
+					outPut('.bottomOutput','Resolve "_doc/" failed: '+e.message);
+				});
+			})			
+			// 获取录音历史列表
+			function updateHistory(){
+				if(bUpdated||!gentry||!document.body){//兼容可能提前注入导致DOM未解析完更新的问题
+					return;
+				}
+				
+				//创建目录读取对象
+			  	var reader = gentry.createReader();
+			  	//获取当前目录中的所有文件和子目录
+			  	reader.readEntries(function(entries){
+			  		for(var i in entries){
+			  			if(entries[i].isFile){
+			  				createItem(entries[i]);
+			  			}
+			  		}
+			  	}, function(e){
+			  		outPut('.bottomOutput','读取录音列表失败：'+e.message);
+			  	});
+			  	bUpdated = true;
+			}
+			
+			//点击空记录
+			function empty(){
+				plus.nativeUI.alert('无扫描记录');
+			}
+			
+			//拍照
+			function getImage(){
+				outPut('.bottomOutput','开始拍照：');
+				
+				//获取摄像头管理对象，参数index: ( Number ) 可选 要获取摄像头的索引值，指定要获取摄像头的索引值，1表示主摄像头，2表示辅摄像头。如果没有设置则使用系统默认主摄像头
+				var cmr = plus.camera.getCamera();
+				
+				//进行拍照操作
+				cmr.captureImage(function(p){
+					//p拍照或摄像操作保存的文件路径
+					outPut('.bottomOutput','成功：'+p);
+					//根据路径p读取文件
+					plus.io.resolveLocalFileSystemURL(p, function(entry){
+						createItem(entry);
+					}, function(e){
+						outPut('.bottomOutput','读取拍照文件错误：'+e.message);
+					});
+				}, function(e){
+					outPut('.bottomOutput','失败：'+e.message);
+				}, {
+					filename:'_doc/camera/',//拍照或摄像文件保存的路径
+					index:1//拍照或摄像默认使用的摄像头，1表示主摄像头，2表示辅摄像头
+				});
+			}
+			// 想历史列表中添加播放项
+			function createItem(entry){
+				var li = document.createElement('li');
+				li.className = 'mui-table-view-cell';
+				li.innerHTML = '<span class="iplay"><font class="aname"></font><br/><font class="ainf"></font></span>';
+				li.setAttribute('onclick', 'displayFile(this)' );//点击li时播放或者显示文件
+				hl.insertBefore( li, le.nextSibling );
+				li.querySelector('.aname').innerText = entry.name;
+				li.querySelector('.ainf').innerText = '...';
+				li.entry = entry;
+				updateInformation(li);
+				// 设置空项不可见
+				le.style.display = 'none';
+			}
+			// 将图片或者录音文件信息绑定到li元素上
+			function updateInformation(li){
+				if(!li || !li.entry){
+					return;
+				}
+				var entry = li.entry;
+				//获取文件或目录的属性信息
+				entry.getMetadata(function(metadata){
+					//metadata文件或目录的状态信息
+					li.querySelector('.ainf').innerText = dateToStr(metadata.modificationTime);
+				}, function(e){
+					outPut('.bottomOutput','获取文件"'+entry.name+'"信息失败：'+e.message);
+				});
+			}
+			
+			//录像
+			function getVideo(){
+				outPut('.bottomOutput','开始录像：');
+				
+				//获取摄像头管理对象
+				var cmr = plus.camera.getCamera();
+				
+				//调用摄像头进行摄像操作
+				cmr.startVideoCapture(function(p){
+					outPut('.bottomOutput','成功：'+p);
+					//p拍照或摄像操作保存的文件路径
+					plus.io.resolveLocalFileSystemURL(p, function(entry){
+						createItem(entry);
+					}, function(e){
+						outPut('.bottomOutput','读取录像文件错误：'+e.message);
+					} );
+				}, function(e){
+					outPut('.bottomOutput','失败：'+e.message);
+				}, {
+					filename:'_doc/camera/',//拍照或摄像文件保存的路径
+					index:i//拍照或摄像默认使用的摄像头，1表示主摄像头，2表示辅摄像头
+				});
+			}
+			
+			// 点击历史记录中的li时，显示文件
+			function displayFile(li){
+				if(w){
+					outPut('.bottomOutput','重复点击！');
+					return;
+				}
+				if(!li || !li.entry){
+					outPut('.bottomOutput','无效的媒体文件');
+					return;
+				}
+				//获取文件的名字
+				var name = li.entry.name;
+				//获取文件的后缀
+				var suffix = name.substr(name.lastIndexOf('.'));
+				//根据后缀决定在img页面还是在video页面显示文件
+				var url = '';
+				if(suffix=='.mov' || suffix=='.3gp' || suffix=='.mp4' || suffix=='.avi'){
+					//if(unv){plus.runtime.openFile('_doc/camera/'+name);return;}
+					url = '/views/Camera_video.html';
+				} else {
+					url = '/views/Camera_img.html';
+				}
+				//打开新的窗口显示文件，plus.webview.create( url, id, styles, extras );
+				w=plus.webview.create(url,url,{
+					hardwareAccelerated:true,//窗口是否开启硬件加速，true表示开启硬件加速
+					scrollIndicator:'none',//窗口是否显示滚动条
+					scalable:true,//窗口是否可缩放，scalable:true时，用户可通过双指操作放大或缩小页面
+					bounce:'all'//窗口遇到边框是否有反弹效果
+				});
+				w.addEventListener('loaded', function(){
+					//toLocalURL，获取目录路径转换为本地路径URL地址
+					w.evalJS('loadMedia("'+li.entry.toLocalURL()+'")');
+					//w.evalJS('loadMedia("'+'http://localhost:13131/_doc/camera/'+name+'")');
+				}, false );
+				w.addEventListener('close', function(){
+					w = null;
+				}, false);
+				w.show('pop-in');
+			}
+			
+			//清空历史记录
+			function clearScan(){
+				hl.innerHTML = '<li id="empty" class="mui-table-cell">无历史记录</li>';
+				le = document.getElementById('empty');
+				// 删除音频文件
+				outPut('.bottomOutput','清空拍照录像历史记录：');
+				//递归删除目录
+				gentry.removeRecursively(function(){
+					// Success
+					outPut('.bottomOutput','成功！');
+				}, function(e){
+					outPut('.bottomOutput','失败：'+e.message);
+				});
+			}
+			
+		</script>
+	</body>
+
+</html>

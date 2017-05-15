@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Downloader</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<ul class="mui-table-view">
+			        <li class="mui-table-view-cell" onclick="createDownloadTask()">
+			                	创建下载任务
+			        </li>
+			        <li class="mui-table-view-cell"  onclick="startDownloadTask()">
+			                 	启动下载任务
+			        </li>
+			        <li class="mui-table-view-cell"  onclick="pauseDownloadTask()">
+			                 	暂停下载任务
+			        </li>
+			        <li class="mui-table-view-cell" onclick="resumeDownloadTask()">
+			                 	恢复下载任务
+			        </li>
+			        <li class="mui-table-view-cell" onclick="cancelDownloadTask()">
+			                 	取消下载任务
+			        </li>
+			    </ul>
+		</div>
+		
+		<!--底部输出说明文字-->
+		<div class="bottomOutput">
+			Downloader用于管理文件的下载，可从网络下载各种文件，并支持跨域访问。
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			var dtask=null;//下载download对象
+			//新建下载任务
+			function createDownloadTask(){
+				if ( dtask ) {
+					outPut('.bottomOutput', "下载任务已创建！" );
+					return;
+				}
+			    var url = "http://snip.qq.com/resources/Snip_V2.0_5771.dmg";//要下载文件资源地址
+			    var options = {
+			    	method:"GET"//网络请求类型
+			    };//下载任务参数
+			    
+			    //新建下载任务
+				dtask = plus.downloader.createDownload( url, options );
+				
+				// 监听下载任务状态
+			    dtask.addEventListener( "statechanged", function(task,status){
+			    	if(!dtask){return;}
+			    	var str = '';
+			    	switch(task.state) {
+			    		case 1: // 开始
+			    			str = str +  "开始下载...<br/>" ;
+			    		break;
+			    		case 2: // 已连接到服务器
+			    			str = str + "链接到服务器...<br/>" ;
+			    		break;
+			    		case 3:	// 已接收到数据
+			    			str = str + "下载数据更新:<br/>" ;
+			    			str = str + task.downloadedSize+"/"+task.totalSize ;
+			    		break;
+			    		case 4:	// 下载完成
+			    			str =  str +"下载完成！<br/>" ;
+			    			str =  str + task.totalSize ;
+			    		break;
+			    	}
+			    	outPut('.bottomOutput',str);
+			    } );
+			    outPut('.bottomOutput', "创建下载任务成功！" );
+			}
+			
+			//启动下载任务
+			function startDownloadTask(){
+				if ( !dtask ) {
+					outPut('.bottomOutput', "请先创建下载任务！" );
+					return;
+				}
+				dtask.start();
+			}
+			// 暂停下载任务
+			function pauseDownloadTask(){
+			    dtask.pause();
+			   outPut('.bottomOutput',"暂停下载！" );
+			}
+			// 恢复下载任务
+			function resumeDownloadTask(){
+			    dtask.resume();
+			    outPut('.bottomOutput', "恢复下载！" );
+			}
+			//取消下载任务
+			function cancelDownloadTask(){
+				dtask.abort();
+				dtask = null;
+				outPut('.bottomOutput',"取消下载任务！" );
+			}
+			//清除所有未完成的下载任务
+			function clearDownloadTask(){
+				//清除指定状态的下载任务,如果未指定state值，则清除所有未完成的下载任务。
+				plus.downloader.clear();
+			}
+			//开始所有下载任务
+			function startAll(){
+				plus.downloader.startAll();
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Gallery</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="getImage()">拍照并保存到相册</button>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="galleryImg()">从相册中单选图片</button>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="galleryImgs()">从相册中多选图片</button>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="galleryImgsMaximum()">从相册中多选图片（最多三张）</button>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="galleryImgsSelected()">从相册中多选图片（保存勾选记录）</button>
+			
+			<!-- Image list -->
+			<!--<ul id="list" class="dlist" style="text-align:left;">
+				<li id="empty" class="ditem-empty">无记录</li>
+				<li class="ditem" onclick="displayMedia(this);">
+					<span class="iplay">
+						<div class="aname">.BjMobileService_bmcc168.apk.png</div><br>
+						<div class="ainf">file:///storage/sdcard0/QQBrowser/安装包/.BjMobileService_bmcc168.apk.png</div>
+					</span>
+				</li>
+			</ul>
+			<br/>
+			<div class="button button-waring" onclick="cleanList()">清空列表</div>
+			<br/>-->
+		</div>
+		
+		<div class="bottomOutput">
+			Gallery模块管理系统相册，如从相册中选择图片或视频文件、保存图片或视频文件到相册等功能。
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			//拍照并保存到相册
+			function getImage(){
+				//获取摄像头管理对象
+				var cmr = plus.camera.getCamera();
+				//进行拍照操作
+				cmr.captureImage(function(path){
+					//path拍照或摄像操作保存的文件路径
+					outSet('保存照片到系统相册：');
+					//保存文件到系统相册中
+					plus.gallery.save(path, function(){
+						//path要保存到系统相册中的文件文件地址
+						outPut('.bottomOutput','保存成功');
+					}, function(e){
+						outPut('.bottomOutput','保存失败: '+JSON.stringify(e));
+					});
+				}, function(e){
+					outPut('.bottomOutput','取消拍照');
+				}, {
+					filename:'_doc/gallery/',//拍照或摄像文件保存的路径
+					index:1 //拍照或摄像默认使用的摄像头，1表示主摄像头，2表示辅摄像头。
+				});
+			}
+			
+			//从相册中单选图片
+			function galleryImg(){
+				// 从相册中选择图片
+				outPut('.bottomOutput','从相册中选择图片：');
+				// 从系统相册选择文件（图片或视频）
+			    plus.gallery.pick(function(path){
+			    	//path 选择的图片或视频文件路径
+			    	outPut('.bottomOutput',path);
+			        //showImg( path );
+			        //createItem(path);
+			    }, function(e){
+			    	outPut('.bottomOutput','取消选择图片');
+			    }, {
+			    	filter:'image' //相册中选择文件类型过滤器
+			    });
+			}
+			
+			//从相册中多选图片
+			function galleryImgs(){
+				// 从相册中选择图片
+				outPut('.bottomOutput','从相册中选择多张图片：');
+				//从系统相册选择文件（图片或视频）
+			    plus.gallery.pick(function(e){
+			    	// e.files保存多选的图片或视频文件路径
+			    	var str = '';
+			    	for(var i in e.files){
+				    	str = str + e.files[i]+'<br/>';
+			    	}
+			    	outPut('.bottomOutput',str);
+			    }, function(e){
+			    	outPut('.bottomOutput','取消选择图片');
+			    },{
+			    	filter:'image',//相册中选择文件类型过滤器
+			    	multiple:true,//相册中选择文件类型过滤器
+			    	system:false//是否使用系统相册文件选择界面
+			    });
+			}
+			
+			//从相册中多选图片（最多三张）
+			function galleryImgsMaximum(){
+				// 从相册中选择图片
+				outPut('.bottomOutput','从相册中选择多张图片(限定最多选择3张)：');
+			    plus.gallery.pick(function(e){
+			    	var str = '';
+			    	for(var i in e.files){
+			    		str = str + e.files[i]+'<br/>';
+			    	}
+			    	outPut('.bottomOutput',str);
+			    }, function(e){
+			    	outPut('.bottomOutput','取消选择图片');
+			    },{
+			    	filter:'image',//相册中选择文件类型过滤器
+			    	multiple:true,//相册中选择文件类型过滤器
+			    	maximum:3, //最多选择的图片数量
+			    	system:false,//是否使用系统相册文件选择界面
+			    	onmaxed:function(){//超过最多选择图片数量事件
+						plus.nativeUI.alert('最多只能选择3张图片');
+			    }});// 最多选择3张图片
+			}
+			
+			//从相册中多选图片（保存勾选记录）
+			var lfs=null;// 保留上次选择图片列表
+			function galleryImgsSelected(){
+				// 从相册中选择图片
+				outPut('.bottomOutput','从相册中选择多张图片(限定最多选择3张)：');
+			    plus.gallery.pick(function(e){
+			    	lfs=e.files;
+			    	var str = '';
+			    	for(var i in e.files){
+			    		str = str + e.files[i]+'<br/>';
+			    	}
+			    	outPut('.bottomOutput',str);
+			    }, function(e){
+			    	outPut('.bottomOutput','取消选择图片');
+			    },{
+			    	filter:'image',
+			    	multiple:true,
+			    	maximum:3,
+			    	selected:lfs,//已选择的图片路径列表
+			    	system:false,
+			    	onmaxed:function(){
+						plus.nativeUI.alert('最多只能选择3张图片');
+			    }});// 最多选择3张图片
+			}
+			
+			
+			function plusReady(){
+				// 用户侧滑返回时关闭显示的图片
+				plus.webview.currentWebview().addEventListener('popGesture', function(e){
+					if(e.type=='start'){
+						closeImg();
+					}
+				}, false );
+			}
+			document.addEventListener('plusready',plusReady,false);
+			
+			function showImg(url){
+				// 兼容以"file:"开头的情况
+				if(0!=url.indexOf('file://')){
+					url='file://'+url;
+				}
+				var _body_ = document.body;
+				var _div_ = document.createElement('div');
+				_div_.style.top='0px';
+				_div_.style.left='0px';
+				_div_.style.height='100%';
+				_div_.style.width='100%';
+				_div_.style.zIndex='99999';
+				_div_.style.position='fixed';
+				_div_.style.background='#ffffff';
+				_div_.id='imgShow';
+				_div_.onclick=closeImg;
+				var _img_=document.createElement('img');
+				_img_.src=url;
+				_img_.style.width='100%';
+				_body_.appendChild(_div_);
+				_div_.appendChild(_img_);
+			}
+			function closeImg(){
+				var trnode=document.getElementById('imgShow');
+				trnode&&trnode.parentNode.removeChild(trnode);
+			}
+			
+			var list=null,first=null;
+			document.addEventListener('DOMContentLoaded', function(){
+				list=document.getElementById('list');
+				first=document.getElementById('empty');
+			}, false);
+			// 添加列表项
+			function createItem(path){
+				var li = document.createElement('li');
+				li.className = 'ditem';
+				li.innerHTML = '<span class="iplay"><font class="aname"></font><br/><font class="ainf"></font></span>';
+				li.setAttribute('onclick', 'displayMedia(this);' );
+				list.insertBefore(li, first.nextSibling);
+				var i = path.lastIndexOf('/');
+				if(i<0){
+					i = path.lastIndexOf('\\');
+				}
+				li.querySelector('.aname').innerText = path.substr(i+1);
+				li.querySelector('.ainf').innerText = path;
+				li.path = path;
+				// 设置空项不可见
+				first.style.display = 'none';
+			}
+			// 清除列表记录
+			function cleanList() {
+				list.innerHTML = '<li id="empty" class="ditem-empty">无记录</li>';
+				empty = document.getElementById('empty');
+				// 删除音频文件
+				outSet('清空选择照片记录：');
+			}
+			// 返回后关闭图片显示
+			var _back=window.back;
+			window.back=function(){
+				closeImg();
+				_back();
+			};
+		</script>
+	</body>
+
+</html>

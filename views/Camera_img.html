@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body style="text-align:center;background:#000000;">
+		<img id="img" onclick="back()" onload="imgLoaded()" onerror="imgError()" />
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			var w=null;
+			
+			function imgLoaded(){
+				//如果窗口w存在，则关闭窗口w
+				w&&(w.close(),w=null);
+				
+				var bodyEl = document.body;
+				var img = document.getElementById('img');
+				
+				//获取body的宽高比
+				var pb = bodyEl.clientHeight/bodyEl.clientWidth,
+				//获取img的宽高比
+				pi = img.clientHeight/img.clientWidth;
+				
+				//将图片限定到显示框内
+				if(pb > pi){
+					img.style.width = '100%';
+				}else{
+					img.style.height = '100%';
+				}
+				
+				//将body的行高设置为body的高度
+				bodyEl.style.lineHeight = bodyEl.clientHeight+'px';
+			}
+			
+			//错误处理函数
+			function imgError(){
+				//如果窗口w存在，则关闭窗口w
+				w&&(w.close(),w=null);
+				//隐藏图片
+				document.getElementById('img').style.display = 'none';
+				
+				plus.nativeUI.alert('无效的图片资源', function(){
+					back();
+				});
+			}
+			
+			function loadMedia(src){
+				document.getElementById('img').src=src;
+			}
+			
+			function back(){
+				plus.webview.currentWebview().close();
+			}
+		</script>
+	</body>
+
+</html>

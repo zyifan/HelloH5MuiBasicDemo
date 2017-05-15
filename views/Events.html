@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Events</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<br/>
+			<p class="des">按“HOME”键切换应用触发“pause”和“resume”事件，在设置中改变网络配置触发“netchange”事件。</p>
+			<br/>
+			<p>"pause": 运行环境从前台切换到后台事件<br />"resume": 运行环境从后台切换到前台事件<br />"netchange": 设备网络状态变化事件</p>
+		</div>
+		
+		<div class="bottomOutput">
+			Events模块管理客户端事件，包括系统事件，如扩展API加载完毕、程序前后台切换等。<br/>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			//获取当前时间
+			function currentTimeString(){
+				var d = new Date();
+				return d.getHours()+":"+d.getMinutes()+":"+d.getSeconds()+"."+d.getMilliseconds()+" - ";
+			}
+			mui.plusReady(function(){
+				if(window.plus){
+					if(document.body){
+						outPut('.bottomOutput', currentTimeString()+" HTML5 Plus已准备" );
+					}else{
+						//监听DOMContentLoaded事件
+						document.addEventListener("DOMContentLoaded",function(){
+							outPut('.bottomOutput', currentTimeString()+" HTML5 Plus已准备" );
+						},false);
+					}
+				}else{
+					//监听plusready事件
+					document.addEventListener("plusready",function(){
+						outPut('.bottomOutput',currentTimeString()+" HTML5 Plus已准备" );
+					}, false );
+				}
+				
+				//为document监听pause事件
+				document.addEventListener("pause",function(){
+					outPut('.bottomOutput',currentTimeString()+" 应用从前台切换到后台" );
+				}, false );
+				//为document监听resume事件
+				document.addEventListener("resume",function(){
+					outPut('.bottomOutput', currentTimeString()+" 应用从后台切换到前台" );
+				}, false );
+				//为document监听netchange事件
+				document.addEventListener("netchange",function(){
+				    var types = {};
+				    types[plus.networkinfo.CONNECTION_UNKNOW] = "未知";
+				    types[plus.networkinfo.CONNECTION_NONE] = "未连接网络";
+				    types[plus.networkinfo.CONNECTION_ETHERNET] = "有线网络";
+				    types[plus.networkinfo.CONNECTION_WIFI] = "WiFi网络";
+				    types[plus.networkinfo.CONNECTION_CELL2G] = "2G蜂窝网络";
+				    types[plus.networkinfo.CONNECTION_CELL3G] = "3G蜂窝网络";
+				    types[plus.networkinfo.CONNECTION_CELL4G] = "4G蜂窝网络";
+					outPut('.bottomOutput', currentTimeString()+" 切换网络："+types[plus.networkinfo.getCurrentType()] );
+				}, false );
+				//newintent新意图事件
+				document.addEventListener("newintent",function(){
+					outPut('.bottomOutput', currentTimeString()+" 从第三方应用启动："+plus.runtime.arguments );
+				}, false );
+			})
+		</script>
+	</body>
+
+</html>

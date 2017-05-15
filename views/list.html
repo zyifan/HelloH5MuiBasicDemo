@@ -9,23 +9,112 @@
 	</head>
 
 	<body>
-		<div class="mui-content">
-		    <ul id="list" class="mui-table-view">
-		        <li class="mui-table-view-cell">
+		<!--下拉刷新容器-->
+		<div id="refreshContainer" class="mui-content mui-scroll-wrapper">
+		  <div class="mui-scroll">
+		    <!--数据列表-->
+		    <ul id="list" class="mui-table-view mui-table-view-chevron">
+		       <li class="mui-table-view-cell">
 		            <a class="mui-navigate-right" ntype="true" href="Accelerometer.html">
 		                Accelerometer
+		                <p><small>音频录制、播放</small></p>
 		            </a>
 		        </li>
 		        <li class="mui-table-view-cell">
 		            <a class="mui-navigate-right" href="Audio.html">
 		                 Audio
+		                 <p><small>音频录制、播放</small></p>
 		            </a>
-		        </li>	        
+		        </li>	   
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Barcodel.html">
+		                 Barcode
+		                 <p><small>音频录制、播放</small></p>
+		            </a>
+		        </li>	  
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Camera.html">
+		                 Camera
+		                 <p><small>摄像头拍照、录像</small></p>
+		            </a>
+		        </li>	  
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Device.html">
+		                 Device
+		                 <p><small>设备信息</small></p>
+		            </a>
+		        </li>	  
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Downloader.html">
+		                 Downloader
+		                 <p><small>下载管理</small></p>
+		            </a>
+		        </li>	  
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Events.html">
+		                 Events
+		                 <p><small>系统事件</small></p>
+		            </a>
+		        </li>	  
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="FileSystem.html">
+		                 FileSystem
+		                 <p><small>文件系统</small></p>
+		            </a>
+		        </li>	
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Gallery.html">
+		                 Gallery
+		                 <p><small>系统相册</small></p>
+		            </a>
+		        </li>	
+		        <li class="mui-table-view-cell">
+		            <a class="mui-navigate-right" href="Geolocation.html">
+		                 Geolocation
+		                 <p><small>地理定位</small></p>
+		            </a>
+		        </li>	
 		    </ul>
+		  </div>
 		</div>
+		
 		<script src="../js/mui.min.js"></script>
 		<script type="text/javascript">
-			mui.init();			
+			mui.init({
+				pullRefresh : {
+				    container:"#refreshContainer",//下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+				    down : {
+				      contentdown : "下拉可以刷新",//可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+				      contentover : "释放立即刷新",//可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+				      contentrefresh : "正在刷新...",//可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+				      callback: pulldownRefresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				    },
+				    up:{
+				    	contentrefresh: '正在加载...',
+						callback: pullupRefresh
+				    }
+			    } 
+			});
+			function pulldownRefresh() {
+				setTimeout(function(){
+					 //业务逻辑代码，比如通过ajax从服务器获取新数据；
+//				     plus.nativeUI.alert('refresh down');
+				     
+				     //注意，加载完新数据后，必须执行如下代码，注意：若为ajax请求，则需将如下代码放置在处理完ajax响应数据之后
+				     mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+				},1000)
+			    
+			}
+			function pullupRefresh(){
+				setTimeout(function(){
+					 //业务逻辑代码，比如通过ajax从服务器获取新数据；
+//				     plus.nativeUI.alert('refresh up');
+				     
+				     //注意，加载完新数据后，必须执行如下代码，注意：若为ajax请求，则需将如下代码放置在处理完ajax响应数据之后
+				     mui('#refreshContainer').pullRefresh().endPullupToRefresh();
+				},1000)
+			}
+
 			mui('#list').on('tap','a',function(){
 				
 				var nativeType = this.getAttribute('ntype');
@@ -38,14 +127,16 @@
 				
 				var url = this.getAttribute('href');
 				var id = this.getAttribute('id') || this.getAttribute('href');
-				var title = this.innerHTML
+				var titleTxt =this.innerHTML.trim();
+				var reg = /\w*/ig;
+				titleTxt = reg.exec(titleTxt)[0];
 				if(nativeType){
 					mui.openWindowWithTitle({
 						url:url,
 						id:id
 					},{
 						title:{
-							text:this.innerText.trim()
+							text:titleTxt
 						},
 						back:{
 							image:{

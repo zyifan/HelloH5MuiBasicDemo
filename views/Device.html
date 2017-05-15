@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../css/common.css"/>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Device</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<ul class="mui-table-view">
+			        <li class="mui-table-view-cell" onclick="getDeviceInfo()">
+			            <a>获取设备信息</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="getSysInfo()">
+			            <a>获取系统信息</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="deviceBeep()">
+			            <a>蜂鸣</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="deviceVibrate()">
+			            <a>震动</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="dial()">
+			            <a>拨打电话(10086)</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="getNet()">
+			            <a>获取设备的网络类型</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="getV()">
+			            <a>获取系统音量</a>
+			        </li>
+			        <li class="mui-table-view-cell" onclick="setV()">
+			            <a>设置系统音量为0.6</a>
+			        </li>
+			    </ul>
+		</div>
+		<!--底部输出说明文字-->
+		<div class="bottomOutput">
+			Device可获取手机设备相关信息，包括硬件、软件、网络等信息。
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init()
+			//获取设备信息
+			function getDeviceInfo(){
+				var str = "",i;
+			    str += "设备型号：" + plus.device.model + "<br/>";
+			    str += "设备厂商：" + plus.device.vendor + "<br/>";
+			    str += "IMEI：" + plus.device.imei + "<br/>";
+			    str += "UUID: " + plus.device.uuid + "<br/>";
+			    str += "IMSI：";
+			    for ( i=0; i<plus.device.imsi.length; i++ ) {
+			        str += plus.device.imsi[i];
+			    }
+			    str += "<br/>";
+			    str += "屏幕分辨率：" + plus.screen.resolutionWidth*plus.screen.scale + " x " + plus.screen.resolutionHeight*plus.screen.scale + "<br/>";
+			    str += "DPI：" + plus.screen.dpiX + " x " + plus.screen.dpiY;
+			    outPut('.bottomOutput', str );
+			}
+			//获取系统信息
+			function getSysInfo(){
+				var str = "";
+			    str += "名称：" + plus.os.name + "<br/>";
+			    str += "版本：" + plus.os.version + "<br/>";
+			    str += "语言：" + plus.os.language + "<br/>";
+			    str += "厂商：" + plus.os.vendor + "<br/>";
+			    str += "网络类型：";
+			    var types = {};
+			    types[plus.networkinfo.CONNECTION_UNKNOW] = "未知";
+			    types[plus.networkinfo.CONNECTION_NONE] = "未连接网络";
+			    types[plus.networkinfo.CONNECTION_ETHERNET] = "有线网络";
+			    types[plus.networkinfo.CONNECTION_WIFI] = "WiFi网络";
+			    types[plus.networkinfo.CONNECTION_CELL2G] = "2G蜂窝网络";
+			    types[plus.networkinfo.CONNECTION_CELL3G] = "3G蜂窝网络";
+			    types[plus.networkinfo.CONNECTION_CELL4G] = "4G蜂窝网络";
+			    //获取设备当前连接的网络类型
+			    str += types[plus.networkinfo.getCurrentType()];
+			    outPut('.bottomOutput', str );
+			}
+			//蜂鸣
+			function deviceBeep(){
+				var str = "";
+			    switch ( plus.os.name ) {
+			    	case "iOS":
+					    if ( plus.device.model.indexOf("iPhone") >= 0 ) {
+			                plus.device.beep();
+					        str += "设备蜂鸣中...";
+					    } else {
+					        str += "此设备不支持蜂鸣";
+					    }
+			    		break;
+			    	default:
+			    		plus.device.beep();
+			    		str += "设备蜂鸣中...";
+			    		break;
+			    }
+				outPut('.bottomOutput',str );
+			}
+			//震动
+			function deviceVibrate(){
+				var str = "";
+			    switch ( plus.os.name ) {
+			    	case "iOS":
+			            if ( plus.device.model.indexOf("iPhone") >= 0 ) {
+			                plus.device.vibrate();
+			                str += "设备振动中...";
+			            } else {
+			                str += "此设备不支持振动";
+			            }
+			    	break;
+			    	default:
+			    		plus.device.vibrate();
+			            str += "设备振动中...";
+			    	break;
+			    }
+				outPut('.bottomOutput', str );
+			}
+			//拨打电话
+			function dial(){
+				//plus.device.dial( number, confirm );
+				//number: ( String ) 必选 要拨打的电话号码
+				//confirm: ( Boolean ) 可选 是否需要用户确认后开始拨打电话,true表示打开系统拨打电话界面，需用户点击拨号按钮后才开始拨打电话，false则无需确认直接拨打电话，默认值为true。
+				plus.device.dial("10086",true);
+			}
+			
+			//获取网络类型
+			function getNet(){
+				var types = {}; 
+				types[plus.networkinfo.CONNECTION_UNKNOW] = "Unknown connection"; 
+				types[plus.networkinfo.CONNECTION_NONE] = "None connection"; 
+				types[plus.networkinfo.CONNECTION_ETHERNET] = "Ethernet connection"; 
+				types[plus.networkinfo.CONNECTION_WIFI] = "WiFi connection"; 
+				types[plus.networkinfo.CONNECTION_CELL2G] = "Cellular 2G connection"; 
+				types[plus.networkinfo.CONNECTION_CELL3G] = "Cellular 3G connection"; 
+				types[plus.networkinfo.CONNECTION_CELL4G] = "Cellular 4G connection"; 
+				var str = plus.networkinfo.getCurrentType();	
+				outPut('.bottomOutput', types[str] );
+			}
+			
+			//获取系统音量
+			function getV(){
+				var str='';
+				str ='系统当前音量：'+ plus.device.getVolume();
+				outPut('.bottomOutput', str );
+			}
+			//设置系统音量为0.8
+			function setV(){
+				plus.device.setVolume(0.6);
+				outPut('.bottomOutput', '系统音量设置为0.6' );
+			}
+		</script>
+	</body>
+
+</html>

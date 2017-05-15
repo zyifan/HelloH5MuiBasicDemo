@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body style="text-align:center;background:#DDDDDD;" onload="init();">
+		<div style="width:100%;height:100%;display:table;" onclick="back();">
+			<div style="display:table-cell;vertical-align:middle;">
+				<video id="video" style="width:100%;" autoplay controls onerror="videoError(event);"></video>
+			</div>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			var v=null;//video元素
+			
+			function loadMedia( src ) {
+				v.src = src;
+				v.play();
+			}
+			
+			function videoFinished() {
+				back();
+			}
+			
+			//获取video元素
+			function init() {
+				v = document.getElementById("video");
+				//v.onended = videoFinished;
+			}
+			
+			//video播放出错视频
+			function videoError(e) {
+				switch (e.target.error.code) {
+			     case e.target.error.MEDIA_ERR_ABORTED:
+			       alert('You aborted the video playback.');
+			       break;
+			     case e.target.error.MEDIA_ERR_NETWORK:
+			       alert('A network error caused the video download to fail part-way.');
+			       break;
+			     case e.target.error.MEDIA_ERR_DECODE:
+			       alert('The video playback was aborted due to a corruption problem or because the video used features your browser did not support.');
+			       break;
+			     case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+			       alert('The video could not be loaded, either because the server or network failed or because the format is not supported.');
+			       break;
+			     default:
+			       alert('An unknown error occurred.');
+			       break;
+			   }
+			
+				plus.nativeUI.alert( "无效的视频资源", function(){
+					back();
+				});
+			}
+			
+			//关闭窗口
+			function back(){
+				plus.webview.currentWebview().close();
+			}
+		</script>
+	</body>
+
+</html>

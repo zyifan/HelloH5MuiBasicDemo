@@ -13,11 +13,21 @@
 		"resources": [
 			"fonts/mui.ttf",
 			"js/mui.min.js",
-			"css/mui.min.css"
+			"css/mui.min.css",
+			"views/Events.html",
+			"views/Accelerometer.html"
 		],
 		"refer": [
 			"views/Accelerometer.html",
-			"views/Audio.html"
+			"views/Audio.html",
+			"views/Barcodel.html",
+			"views/Camera.html",
+			"views/Device.html",
+			"views/Downloader.html",
+			"views/Events.html",
+			"views/FileSystem.html",
+			"views/Gallery.html",
+			"views/Geolocation.html"
 		]
 	},
 	"views/Accelerometer.html": {
@@ -50,7 +60,105 @@
 			"js/mui.min.js",
 			"css/mui.min.css",
 			"fonts/mui.ttf",
-			"img/astop.png"
+			"img/astop.png",
+			"js/common.js"
+		]
+	},
+	"views/Barcodel.html": {
+		"resources": [
+			"img/barcode.png",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"js/common.js"
+		],
+		"refer": [
+			"views/Barcode_scan1.html",
+			"views/Barcode_scan.html"
+		]
+	},
+	"views/Barcode_scan.html": {
+		"resources": [
+			"js/mui.min.js",
+			"css/mui.min.css"
+		]
+	},
+	"views/Barcode_scan1.html": {
+		"resources": [
+			"js/mui.min.js",
+			"css/mui.min.css"
+		]
+	},
+	"views/Camera.html": {
+		"resources": [
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"css/common.css",
+			"js/common.js"
+		],
+		"refer": [
+			"views/Camera_img.html",
+			"views/Camera_video.html"
+		]
+	},
+	"views/Device.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Downloader.html": {
+		"resources": [
+			"css/mui.min.css",
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf"
+		]
+	},
+	"views/Events.html": {
+		"resources": [
+			"js/common.js",
+			"css/common.css",
+			"js/mui.min.js",
+			"css/mui.min.css",
+			"fonts/mui.ttf"
+		]
+	},
+	"views/FileSystem.html": {
+		"resources": [
+			"img/fup.png",
+			"img/fdisk.png",
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"img/ffile.png",
+			"img/fdir.png"
+		]
+	},
+	"views/Gallery.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Geolocation.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
 		]
 	}
 }

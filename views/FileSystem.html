@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">File System</h1>
+		</header>
+		<div class="mui-content">
+			<ul id="docList" class="mui-table-view">
+				<li id="pdir" class="mui-table-view-cell" style="display:none" onclick="parentDir()">
+					<img class="mui-media-object mui-pull-left" src="../img/fup.png">
+				    <p style="line-height: 42px;">返回上一级</p>
+				</li>
+			    <li id="_www" class="mui-table-view-cell mui-media"  onclick="openDir(this)">
+			        <a href="javascript:;">
+			            <img class="mui-media-object mui-pull-left ficon" src="../img/fdisk.png">
+			            <div class="mui-media-body">
+			                <span class="fname">www应用运行资源目录常量</span>
+			                <p class="mui-ellipsis finf">...</p>
+			            </div>
+			        </a>
+			    </li>
+			    <li id="_doc" class="mui-table-view-cell mui-media"  onclick="openDir(this)">
+			        <a href="javascript:;">
+			            <img class="mui-media-object mui-pull-left ficon" src="../img/fdisk.png">
+			            <div class="mui-media-body">
+			                 <span class="fname">doc应用私有文档目录常量</span>
+			                <p class="mui-ellipsis finf">...</p>
+			            </div>
+			        </a>
+			    </li>
+			    <li id="_documents" class="mui-table-view-cell mui-media"  onclick="openDir(this)">
+			        <a href="javascript:;">
+			            <img class="mui-media-object mui-pull-left ficon" src="../img/fdisk.png">
+			            <div class="mui-media-body">
+			                 <span class="fname">documents程序公用文档目录常量</span>
+			                <p class="mui-ellipsis finf">...</p>
+			            </div>
+			        </a>
+			    </li>
+			    <li id="_downloads" class="mui-table-view-cell mui-media"  onclick="openDir(this)">
+			        <a href="javascript:;">
+			            <img class="mui-media-object mui-pull-left ficon" src="../img/fdisk.png">
+			            <div class="mui-media-body">
+			                 <span class="fname">downloads程序公用下载目录常量</span>
+			                <p class="mui-ellipsis finf">...</p>
+			            </div>
+			        </a>
+			    </li>
+			</ul>			
+		</div>
+		<div class="bottomOutput">
+			File System模块管理本地文件系统，用于文件系统目录的浏览、文件的写入、文件的读取等操作。
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			var dir="",//根目录
+				root=[],//存放根目录entry数组
+				current=null,//当前目录位置
+				parent=null,//父目录
+				pitem=null,//获取列表返回标题li
+				list=null;//获取列表容器ul
+				
+			var htmlItem='<a href="javascript:;">'+
+				            '<img class="mui-media-object mui-pull-left ficon" src="../img/fdisk.png">'+
+				            '<div class="mui-media-body">'+
+				                '<span class="fname">dir</span>'+
+				                '<p class="mui-ellipsis finf">...</p>'+
+				            '</div>'+
+			        	'</a>';
+			
+			pitem = document.getElementById("pdir");//获取列表返回标题li
+			list = document.getElementById("docList");//获取列表容器ul		
+			
+			//打开目录
+			function openDir(item){
+				var entry = item.entry;
+				if ( !entry ) {
+					outPut('.bottomOutput', "Open directory \""+item.id+"\" with null!" );
+					return;
+				}
+				if ( entry.isDirectory ) {
+					outPut('.bottomOutput', "Open directory: \""+dir+item.id+"\"" );
+					//创建目录读取对象
+					var dirReader = entry.createReader();
+					//获取当前目录中的所有文件和子目录
+					dirReader.readEntries( function( entries ) {
+						//将current赋值给parent
+						parent = current;
+						//将entry赋值给current
+						current = item.entry;
+						//获取目录路径转换为URL地址，并赋值给全局变量dir
+						dir = entry.toURL()+"/";
+						// Dispaly up to parent item，显示返回栏
+						pitem.style.display = "block";
+						// Update ui，更新列表
+						updateList( entries );
+					}, function ( e ) {
+						outPut('.bottomOutput', "Read directory "+item.id+" failed: "+e.message );
+					});
+				} else {
+					outPut('.bottomOutput', "Open file: \""+dir+item.id+"\"" );
+					//调用第三方程序打开指定的文件
+					plus.runtime.openFile( dir+item.id, {}, function ( e ) {
+						plus.nativeUI.alert( "无法打开此文件："+e.emssage );
+					} );
+				}
+			}
+			// Update ui with entries, 将entries信息更新到html中
+			function updateList( entries ) {
+				//获取li列表数组
+				var i,items = [].slice.apply(list.querySelectorAll(".mui-table-view-cell"));
+				//去掉返回栏
+				items.shift();
+				
+				// 排序entries
+				entries.sort( sortCompareEntry )
+				
+				// Update item to ui，变量entries，并将entry信息添加到li的子列表中
+				for ( i = 0; i < entries.length; i++ ) {
+					var di = null;
+					if ( i < items.length ) {
+						di=items[i];
+						di.style.display = "block";
+					} else {
+						di = document.createElement("li");
+						di.className = "mui-table-view-cell";
+						di.setAttribute( "onclick", "openDir(this);" );
+						di.innerHTML = htmlItem;
+						list.appendChild( di );
+					}
+					di.entry = entries[i];
+					di.id = di.entry.name;
+					di.querySelector(".fname").innerText = di.id;
+					di.querySelector(".finf").innerText = "";
+					if ( entries === root ) {
+						di.querySelector(".ficon").src = "../img/fdisk.png";
+					} else {
+						di.querySelector(".ficon").src = di.entry.isDirectory?"../img/fdir.png":"../img/ffile.png";
+					}
+					//将entry信息更新到li中
+					updateInf( di, di.entry );
+				}
+				// Hide other items，隐藏其它多余的item项
+				for ( ; i < items.length; i++ ) {
+					items[i].style.display = "none";
+					items[i].entry = null;
+				}
+				// Reset scroll offset
+				list.scrollTop = 0;
+			}
+			// Entry sort compare，entry排序规则
+			function sortCompareEntry( a, b ) {
+				if ( a.isDirectory && b.isFile ) {
+					return -1;
+				} else if ( a.isFile && b.isDirectory ) {
+					return 1;
+				} else {
+					return a.name - b.name;
+				}
+			}
+			// 将文件信息写入到item中，Update HTMLUIElement information with entry object
+			function updateInf( item, entry ) {
+				//获取文件的属性信息
+				entry.getMetadata( function ( metadata ) {
+					var inf = item.querySelector(".mui-ellipsis");
+					if ( entry.isDirectory ) {
+						inf.innerText = "文件夹:"+metadata.directoryCount+"项，文件:"+metadata.fileCount+"项";
+					} else {
+						inf.innerText = dateToStr(metadata.modificationTime);
+					}
+				}, function ( e ) {
+					outPut('.bottomOutput',"Get metadata "+entry.name+" failed: "+e.message );
+				}, false );
+			}
+		
+			//plusReady事件
+			mui.plusReady(function(){
+				
+				//获取root中item的信息
+				var items = list.querySelectorAll(".mui-table-view-cell");//获取列表中所有的li
+				for ( var i = 1; i < items.length; i++ ) {
+					updateRootItem( items[i] );
+				}
+				// Update root information with item(HTMLUIElement)
+				function updateRootItem( item ) {
+					//读取_www或者_doc中的信息
+					plus.io.resolveLocalFileSystemURL( dir+item.id, function ( entry ) {
+						//entry文件系统中的文件对象，将entry存储到root数组中
+						root.push( entry );
+						//将entry对象放到li上
+						item.entry = entry;
+						//将文件信息写入到item中
+						updateInf( item, entry );
+					}, function ( e ) {
+						outPut('.bottomOutput', "Update "+item.id+" information failed: "+e.message );
+					} );
+				}
+				
+				
+			})
+			
+			// Back to parent directory，返回父目录
+			function parentDir() {
+				outPut('.bottomOutput', "Go to previous directory: \""+dir+"\"");
+				//获取‘/’符号的位置
+				var p = dir.lastIndexOf( "/", dir.length-2 );
+				if ( p < 0 || !parent ) { // Up to root，如果路径中不存在/符号，更新到根节点
+					dir = "";
+					current = parent = null;
+					// hide up to parent item，隐藏返回栏
+					pitem.style.display = "none";
+					// Update ui
+					updateList( root );
+				} else {
+					var dirReader = parent.createReader();
+					dirReader.readEntries( function( entries ) {
+						dir = dir.substr( 0, p+1 );
+						outPut('.bottomOutput', "Current directory: \""+dir+"\"" );
+						current = parent;
+						//获取目录所属的父目录
+						current.getParent( function ( entry ) {
+							parent = entry;
+						}, function ( e ) {
+							outPut('.bottomOutput',"Get \""+current.name+"\" parent directory failed: "+e.emssage );
+						} );
+						parent = null;
+						// Update ui
+						updateList( entries );
+					}, function ( e ) {
+						outPut('.bottomOutput', "Read directory "+item.id+" failed: "+e.message );
+					} );
+				}
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+		<style type="text/css">
+			#imgContainer{
+				text-align: center;
+				margin-bottom: 15px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Barcode</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<div id="imgContainer">
+				<img style="width:40%" id="bimg" src="../img/barcode.png"/>
+			</div>
+			<button type="button" onclick="openScan('Barcode_scan.html')" class="mui-btn mui-btn-yellow mui-btn-block">扫一扫</button>
+			<button type="button" onclick="openScan('Barcode_scan1.html')" class="mui-btn mui-btn-yellow mui-btn-block">扫一扫（自定义）</button>
+			<ul id="audioHistory" class="mui-table-view" style="margin: 15px 0;">
+				 <li id="empty" class="mui-table-view-cell" onclick="empty()"><a>无历史记录</a></li>
+			</ul>
+			
+			<button type="button" class="mui-btn mui-btn-grey mui-btn-block clearBtn" onclick="clearScan()">清空历史记录</button>
+		</div>
+		<!--底部输出说明文字-->
+		<div class="bottomOutput">
+			Barcode提供二维码扫描识别功能，支持调用摄像头即时扫描二维码，也可直接输入图片进行扫描识别。
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">			
+			mui.init()
+			//点击空记录
+			function empty(){
+				plus.nativeUI.alert('无扫描记录');
+			}
+			var img = null;
+			var blist = [];
+			img=document.getElementById('bimg')
+			//从扫描页面调用的函数
+			//scaned参数，type、code、filePath
+			function scaned(t, r, f){
+				//获取当前时间
+				var d = new Date();
+				var h=d.getHours(),m=d.getMinutes(),s=d.getSeconds(),ms=d.getMilliseconds();
+				if(h < 10){ h='0'+h; }
+				if(m < 10){ m='0'+m; }
+				if(s < 10){ s='0'+s; }
+				if(ms < 10){ ms='00'+ms; }
+				else if(ms < 100){ ms='0'+ms; }
+				var ts = '['+h+':'+m+':'+s+'.'+ms+']';
+				
+				var li=null,
+					hl = document.getElementById('audioHistory');//获取记录列表容器元素
+					
+				//将li插入到列表中
+				if(blist.length > 0){
+					li = document.createElement('li');
+					li.className = 'mui-table-view-cell';
+					hl.insertBefore(li, hl.childNodes[0]);
+				} else{
+					li = document.getElementById('empty');
+				}
+				
+				li.id = blist.length;
+				var html = '['+h+':'+m+':'+s+'.'+ms+']'+'　　'+t+'码<div class="hdata">';
+				html += r;
+				html += '</div>';
+				li.innerHTML = html;
+				
+				//点击列表信息时添加select函数
+				li.setAttribute('onclick', 'selected(id)');
+				
+				blist[blist.length] = {type:t,result:r,file:f};
+				
+				update(t, r, f);
+			}
+			
+			function selected(id){
+				var h = blist[id];
+				update( h.type, h.result, h.file );
+				//如果result中带有http协议，则调用第三方程序打开url，否则弹出框显示result信息
+				if(h.result.indexOf('http://')==0  || h.result.indexOf('https://')==0){
+					plus.nativeUI.confirm(h.result, function(e){
+						if(e.index == 0){// e.index;用户关闭确认对话框点击按钮的索引值
+							plus.runtime.openURL(h.result);//调用第三方程序打开指定的URL
+						}
+					}, '', ['打开', '取消']);
+				} else{
+					plus.nativeUI.alert(h.result);
+				}
+			}
+			//获取扫描图片信息并显示到底部
+			function update(t, r, f){
+				var html = '<div><p>扫描成功：</p><p>'+t+'</p><p>'+r+'</p><p>\n图片地址：'+f+'</p></div>'
+				outPut('.bottomOutput',html);
+				
+				//处理传入的文件路径f
+				if(!f || f=='null'){
+					img.src = '../img/barcode.png';	
+				} else{
+					plus.io.resolveLocalFileSystemURL(f, function(entry){
+						img.src=entry.toLocalURL();
+					});
+					//img.src = 'http://localhost:13131/'+f;
+				}
+			}
+			
+			
+			//清空列表记录，清除文件内容
+			function clearScan(){
+				if(blist.length > 0){
+					var hl = document.getElementById('audioHistory');
+					hl.innerHTML = '<li id="empty" class="mui-table-view-cell" onclick="empty()"><a>无历史记录</a></li>';
+				}
+				plus.io.resolveLocalFileSystemURL('_doc/barcode/', function(entry){
+					entry.removeRecursively(function(){
+						// Success
+					}, function(e){
+						//alert( "failed"+e.message );
+					});
+				});
+			}
+		</script>
+	</body>
+
+</html>
