@@ -6,6 +6,7 @@
 		<title></title>
 		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
 		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
 	</head>
 
 	<body>
@@ -13,9 +14,51 @@
 		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
 		    <h1 class="mui-title">Maps</h1>
 		</header>
+		<div class="mui-content mui-content-padded">
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="navigateWithMap();">调用第三方地图程序导航</button>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block"onclick="showMaps();">应用内置地图</button>
+			
+		</div>
+		<div class="bottomOutput">
+			Maps模块管理地图控件，用于在web页面中显示地图控件，提供各种接口操作地图控件，如添加标点、路线等。通过plus.maps可获取地图管理对象。
+		</div>
 		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
 		<script type="text/javascript">
 			mui.init()
+			//调用第三方地图程序导航
+			function navigateWithMap(){
+				//系统的名称如果为StreamApp
+				if('Android'===plus.os.name&&navigator.userAgent.indexOf('StreamApp')>0){
+					plus.nativeUI.toast('当前环境暂不支持地图插件');
+					return;
+				}
+				// 设置目标位置坐标点和其实位置坐标点
+				var dst = new plus.maps.Point(116.39131928,39.90793074); // 天安门 ,调用系统第三方程序进行导航
+				var src = new plus.maps.Point(116.335,39.966); // 大钟寺,导航起始地描述
+				
+				// 调用系统地图显示 ,调用系统第三方程序进行导航
+				plus.maps.openSysMap( dst, "天安门", src );
+			}
+			
+			//应用内置地图
+			function showMaps(){
+				if('Android'===plus.os.name&&navigator.userAgent.indexOf('StreamApp')>0){
+					plus.nativeUI.toast('当前环境暂不支持地图插件');
+					return;
+				}
+				//获取当前窗口对象
+//				var ws=plus.webview.currentWebview();
+				//appid: 当前应用的APPID，getWebviewById查找指定标识的WebviewObject窗口
+//				var wm=plus.webview.getWebviewById(plus.runtime.appid);
+				//// 清除预创建页面(仅)
+//				wm&&wm.evalJS("preateClear()");
+				
+				mui.openWindow({
+					url:'Maps_map.html',
+					id:'Maps_map.html'
+				})
+			}
 		</script>
 	</body>
 

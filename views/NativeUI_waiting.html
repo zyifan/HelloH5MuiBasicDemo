@@ -1,0 +1,240 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">NativeUI Waiting</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" onclick="defaultWaiting()">默认等待框</li>
+				<li class="mui-table-view-cell" onclick="nomodalWaiting()">非模态等待框</li>
+				<li class="mui-table-view-cell" onclick="padlockWaiting()">点击关闭等待框</li>
+				<li class="mui-table-view-cell" onclick="customWaiting()">自定义图标等待框</li>
+				<li class="mui-table-view-cell" onclick="lineWaiting()">图标与文字同行</li>
+				<li class="mui-table-view-cell" onclick="transWaiting()">背景透明</li>
+				<li class="mui-table-view-cell" onclick="noneWaiting()">无图标等待框</li>
+				<li class="mui-table-view-cell" onclick="fontWaiting()">大字体等待框</li>
+				<li class="mui-table-view-cell" onclick="blockBackWaiting()">不响应返回键等待框</li>
+				<li class="mui-table-view-cell" onclick="transBackWaiting()">透传返回键等待框</li>
+			</ul>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			//默认等待框
+			function defaultWaiting(){
+				//显示系统等待对话框 plus.nativeUI.showWaiting( title, options );
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5");
+				
+				//等待对话框关闭事件
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					//setTitle: 设置等待对话框上显示的文字内容
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						//close: 关闭显示的系统等待对话框
+						w.close();
+						clearInterval(t);
+					}
+				},1000);
+			}
+			
+			//非模态等待框
+			function nomodalWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5",{
+					modal:false //等待框是否模态显示,模态显示时用户不可操作直到等待对话框关闭，否则用户在等待对话框显示时也可操作下面的内容
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);
+			}
+			
+			//点击关闭等待框
+			function padlockWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5", {
+					padlock:true//点击等待显示区域是否自动关闭
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);
+			}
+			
+			//自定义图标等待框
+			function customWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5", {
+					loading:{//自定义等待框上loading图标样式
+						icon:"/img/waiting.png" //loading图标路径, loading图要求宽是高的整数倍，显示等待框时按照图片的高横向截取每帧刷新。
+					}
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);
+			}
+			
+			//图标与文字同行
+			function lineWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...5", {
+					loading:{display:"inline"}//loading图标显示样式,block、inline、none
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待..."+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);	
+			}
+			
+			//背景透明
+			function transWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...5", {
+					style:"black",//等待对话框样式，black、white
+					color:"#FF0000",//等待框中文字的颜色
+					background:"rgba(0,0,0,0)",//等待对话框显示区域的背景色
+					loading:{display:"inline"}
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待..."+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);	
+			}
+					
+			//无图标等待框
+			function noneWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...5", {
+					color:"#FF0000",
+					background:"rgba(0,0,0,0)",
+					loading:{display:"none"}// "none"表示不显示loading图标；
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待..."+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);	
+			}
+			
+			//大字体等待框
+			function fontWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5",{
+					color:"#FF0000",
+					size:"24px"//等待框中文字的字体大小
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);	
+			}
+			
+			//不响应返回键等待框
+			function blockBackWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5",{
+					back:"none"//返回键处理方式
+					//可取值"none"表示截获处理返回键，但不做任何响应；
+					//"close"表示截获处理返回键并关闭等待框；
+					//"transmit"表示不截获返回键，向后传递给Webview窗口继续处理（与未显示等待框的情况一致）。
+				});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);	
+				
+			}
+			
+			//透传返回键等待框
+			function transBackWaiting(){
+				var w=plus.nativeUI.showWaiting("处理中，请等待...\n5",{padlock:true,back:"transmit"});
+				w.onclose=function(){
+					clearInterval(t);
+				}
+				var n=5;
+				var t=setInterval(function(){
+					n--;
+					w.setTitle("处理中，请等待...\n"+n);
+					if(n<=0){
+						w.close();
+						clearInterval(t);
+					}
+				},1000);
+			}
+			
+		</script>
+	</body>
+
+</html>

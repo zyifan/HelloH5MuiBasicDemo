@@ -43,4 +43,26 @@ function openScan(url){
 		id:url
 	})
 }
-	
+var ws='';
+// 处理返回事件
+window.back=function(hide){
+	if(window.plus){
+		ws||(ws=plus.webview.currentWebview());
+		if(hide||ws.preate){
+			ws.hide('auto');
+		}else{
+			ws.close('auto');
+		}
+	}else if(history.length>1){
+		history.back();
+	}else{
+		window.close();
+	}
+};
+
+window.clicked = function(url){
+	mui.openWindow({
+		url:url,
+		id:url
+	})
+}

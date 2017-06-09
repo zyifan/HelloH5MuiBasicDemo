@@ -15,7 +15,8 @@
 			"js/mui.min.js",
 			"css/mui.min.css",
 			"views/Events.html",
-			"views/Accelerometer.html"
+			"views/Accelerometer.html",
+			"js/common.js"
 		],
 		"refer": [
 			"views/Accelerometer.html",
@@ -27,7 +28,18 @@
 			"views/Events.html",
 			"views/FileSystem.html",
 			"views/Gallery.html",
-			"views/Geolocation.html"
+			"views/Geolocation.html",
+			"views/Maps.html",
+			"views/Messaging.html",
+			"views/NativeObj.html",
+			"views/NativeUI.html",
+			"views/Navigator.html",
+			"views/OAuth.html",
+			"views/Orientation.html",
+			"views/Payment.html",
+			"views/Proximity.html",
+			"views/Push.html",
+			"views/Runtime.html"
 		]
 	},
 	"views/Accelerometer.html": {
@@ -153,6 +165,184 @@
 		]
 	},
 	"views/Geolocation.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Maps.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		],
+		"refer": [
+			"views/Maps_map.html"
+		]
+	},
+	"views/Maps_map.html": {
+		"resources": [
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"views/Maps_map_sub.html"
+		],
+		"refer": [
+			"views/Maps_map_sub.html"
+		]
+	},
+	"views/Maps_map_sub.html": {
+		"resources": [
+			"js/mui.min.js",
+			"css/mui.min.css"
+		]
+	},
+	"views/Messaging.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/NativeObj.html": {
+		"resources": [
+			"css/common.css"
+		],
+		"refer": [
+			"views/NativeObj_animation.html"
+		]
+	},
+	"views/NativeObj_animation.html": {
+		"resources": [
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/NativeUI.html": {
+		"resources": [
+			"js/common.js",
+			"css/common.css"
+		],
+		"refer": [
+			"views/NativeUI_waiting.html"
+		]
+	},
+	"views/NativeUI_waiting.html": {
+		"resources": [
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Navigator.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		],
+		"refer": [
+			"views/Navigator_status.html"
+		]
+	},
+	"views/Navigator_status.html": {
+		"resources": [
+			"js/mui.min.js",
+			"css/mui.min.css"
+		]
+	},
+	"views/OAuth.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Orientation.html": {
+		"refer": [
+			"views/Orientation_compass.html",
+			"views/Orientation_level.html"
+		],
+		"resources": [
+			"js/common.js",
+			"css/common.css",
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Orientation_level.html": {
+		"resources": [
+			"img/orientationl.png",
+			"img/orientationbg.png",
+			"img/orientationb.png",
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"js/common.js"
+		]
+	},
+	"views/Orientation_compass.html": {
+		"resources": [
+			"img/orientationa.png",
+			"img/orientationc.png",
+			"img/orientationbg.png",
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"js/common.js"
+		]
+	},
+	"views/Payment.html": {
+		"resources": [
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"js/common.js",
+			"css/common.css"
+		],
+		"refer": [
+			"views/Payment_iap.html"
+		]
+	},
+	"views/Payment_iap.html": {
+		"resources": [
+			"js/mui.min.js",
+			"fonts/mui.ttf",
+			"css/mui.min.css",
+			"js/common.js"
+		]
+	},
+	"views/Proximity.html": {
+		"resources": [
+			"js/common.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	},
+	"views/Push.html": {
+		"resources": [
+			"css/common.css",
+			"js/mui.min.js",
+			"css/mui.min.css",
+			"fonts/mui.ttf",
+			"js/common.js"
+		]
+	},
+	"views/Runtime.html": {
 		"resources": [
 			"js/common.js",
 			"js/mui.min.js",

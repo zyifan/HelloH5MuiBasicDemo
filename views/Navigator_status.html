@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<div class="mui-content mui-content-padded">
+			<br/>
+			<p class="des">
+				Android平台需要5.0及以上版本支持设置系统状态栏背景颜色。
+			</p>
+			<div class="mui-btn mui-btn-block mui-btn-yellow" onclick="darkStyle()">系统状态栏黑色样式</div>
+			<div class="mui-btn mui-btn-block mui-btn-yellow" onclick="lightStyle()">系统状态栏白色样式</div>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			// H5 plus事件处理
+			var ws=null;
+			mui.plusReady(function(){
+				// 设置状态栏背景颜色
+				ws=mui.currentWebview;
+				ws.addEventListener('show',function(){
+					//设置系统状态栏背景颜色,Android5.0及以上版本生效
+					plus.navigator.setStatusBarBackground("#FF0000");
+				},false);
+			})
+			
+			// 设置系统状态栏为深色前景色（黑色文字）
+			function darkStyle(){
+				plus.navigator.setStatusBarStyle('dark');
+			}
+			// 设置系统状态栏为浅色前景色（白色文字）
+			function lightStyle(){
+				plus.navigator.setStatusBarStyle('light');
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">NativeUI</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<ul class="mui-table-view">
+		        <li class="mui-table-view-cell" onclick="pickDate()">系统日期选择框</li>
+		        <li class="mui-table-view-cell" onclick="pickTime()">系统时间选择框</li>
+		        <li class="mui-table-view-cell" onclick="showAlert()">提示框</li>
+		        <li class="mui-table-view-cell" onclick="showConfirm()">确认框</li>
+		        <li class="mui-table-view-cell" onclick="showPrompt()">输入框</li>
+		        <li class="mui-table-view-cell" onclick="showActionSheet()">弹出菜单ActionSheet</li>
+		        <li class="mui-table-view-cell" onclick="showToast()">自动消失提示框</li>
+		    </ul>
+		    <br />
+		    <button onclick="showWaiting()" type="button" class="mui-btn mui-btn-yellow mui-btn-block">等待框</button>
+		</div>
+		<div class="bottomOutput">
+			nativeUI管理系统原生界面，可用于弹出系统原生提示对话框窗口、时间日期选择对话框、等待对话框等。
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			//系统日期选择框
+			function pickDate() {
+				outPut('.bottomOutput', "打开系统日期选择框：");
+				
+				//setFullYear() 方法用于设置年份
+				var dDate=new Date();
+				dDate.setFullYear(2017,04,16);
+				
+				var minDate=new Date();
+				minDate.setFullYear(2010,0,1);
+				
+				var maxDate=new Date();
+				maxDate.setFullYear(2019,11,31);
+				
+				outPut('.bottomOutput', "[date] "+dDate );
+				outPut('.bottomOutput', "[minDate] "+minDate );
+				outPut('.bottomOutput', "[maxDate] "+maxDate );
+				
+				//弹出系统日期选择对话框
+				plus.nativeUI.pickDate( function(e) {
+					//e: ( Event ) 必选 用户完成选择日期或时间后返回的数据,可通过event.date（Date类型）获取选择的日期或时间值。
+					var d=e.date;
+					outPut('.bottomOutput',"选择的日期："+d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate() );
+				},function(e){
+					outPut('.bottomOutput',"未选择日期："+e.message );
+				},{
+					title:"请选择日期",//日期选择对话框显示的标题
+					date:dDate,//日期选择对话框默认显示的日期
+					minDate:minDate,//日期选择对话框可选择的最小日期
+					maxDate:maxDate//日期选择对话框可选择的最小日期
+				});
+			}
+			
+			//系统时间选择框
+			function pickTime() {
+				outPut('.bottomOutput', "打开系统时间选择框：");
+				
+				var dTime=new Date();
+				dTime.setHours(6,0);
+				
+				outPut('.bottomOutput', "[time] "+dTime );
+				
+				//弹出系统时间选择对话框
+				plus.nativeUI.pickTime(function(e){
+					var d=e.date;
+					outPut('.bottomOutput', "选择的时间："+d.getHours()+":"+d.getMinutes() );
+				},function (e){
+					outPut('.bottomOutput', "取消选择时间！" );
+				},{
+					title:"请选择时间",//时间选择对话框显示的标题
+					is24Hour:true,//是否24小时制模式
+					time:dTime//时间选择对话框默认显示的时间
+				});
+			}
+			
+			//提示框
+			function showAlert(){
+				outPut('.bottomOutput',"弹出系统提示对话框：" );
+				
+				//弹出系统提示对话框 plus.nativeUI.alert( message, alertCB, title, buttonCapture );
+				//message: ( String ) 必选 提示对话框上显示的内容
+				//buttonCapture: ( String ) 必选 提示对话框上按钮显示的内容
+				plus.nativeUI.alert("系统提示框内容\n第二行内容",function(e){
+					//e: ( Event ) 必选 用户操作确认对话框关闭后返回的数据
+					//可通过event.index（Number类型）获取用户关闭确认对话框点击按钮的索引值，点击确认键的索引值为0
+					var i=e.index;
+					if(i<0){
+						outPut('.bottomOutput', "按\"返回\"键关闭提示框！" );
+					}else{
+						outPut('.bottomOutput', "提示框已关闭！" );	
+					}
+				},"nativeUI","好");
+			}
+			
+			//确认框
+			function showConfirm(){
+				outPut('.bottomOutput',"弹出系统确认对话框：" );
+				
+				//弹出系统确认对话框plus.nativeUI.confirm( message, confirmCB, title, buttons );
+				var bts=["是","否","取消"];
+				plus.nativeUI.confirm("系统确认对话框内容\n第二行内容",function(e){
+					var i=e.index;
+					outPut('.bottomOutput',"按\""+((i>=0)?bts[e.index]:"返回")+"\"关闭！" );
+				},"nativeUI",bts);
+			}
+			
+			//输入框
+			function showPrompt(){
+				outPut('.bottomOutput', "弹出系统输入对话框：" );
+				
+				var bts=["确认","取消"];
+				
+				//弹出系统输入对话框 plus.nativeUI.prompt( message, promptCB, title, tip, buttons );
+				//tip: ( String ) 可选 输入对话框上编辑框显示的提示文字
+				plus.nativeUI.prompt("请输入内容",function(e){
+					var i=e.index;
+					outPut('.bottomOutput', "按\""+((i>=0)?bts[e.index]:"返回")+"\"关闭："+e.value );
+				},"nativeUI","内容",bts);
+			}
+			
+			//弹出菜单ActionSheet
+			function showActionSheet(){
+				outPut('.bottomOutput',  "弹出系统选择按钮框：" );
+				
+				var bts=[{
+					title:"警告",//按钮上显示的文字内容
+					style:"destructive" // "destructive" - 表示警示按钮样式，默认文字颜色为红色； "default" - 表示默认按钮样式。 默认值为"default"。
+				},{
+					title:"按钮1"
+				},{
+					title:"按钮2"
+				},{
+					title:"按钮3",
+					color:'#398729' //(String 类型 )按钮上显示的文字颜色
+				}];
+				
+				//弹出系统选择按钮框 plus.nativeUI.actionSheet(actionsheetStyle, actionsheetCallback);
+				plus.nativeUI.actionSheet({
+					title:"ActionSheet标题",//选择按钮框的标题
+					cancel:"取消",//取消按钮上显示的文字内容,不设置此属性，则不显示取消按钮。
+					buttons:bts//选择框上的按钮，ActionButtonStyles对象数组
+				},function(e){
+					outPut('.bottomOutput', "选择了\""+((e.index>0)?bts[e.index-1].title:"取消")+"\"");
+				});
+			}
+
+			//自动消失提示框
+			function showToast(){
+				//显示自动消失的提示消息,plus.nativeUI.toast( message, options );
+				plus.nativeUI.toast("您好！正在使用HBuilder开发应用！",{
+					icon:'../img/pull_fresh.png',//提示消息框上显示的图标
+					style: "inline" ,//(String 类型 )提示消息框上显示的样式'block','inline'
+					duration:"long"//提示消息框显示的时间
+				});
+			}
+			
+			//等待框
+			function showWaiting(){
+				mui.openWindow({
+					url:"NativeUI_waiting.html",
+					id:"NativeUI_waiting.html"
+				})
+			}
+			
+		</script>
+	</body>
+
+</html>

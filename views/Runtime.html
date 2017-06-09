@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Runtime</h1>
+		</header>
+		<div id="dcontent" class="mui-content mui-content-padded">
+			<br/>
+			<div class="mui-btn mui-btn-block mui-badge-yellow" onclick="clicked('runtime_launch.html');">
+				调用第三方程序
+			</div>
+			<br/>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" onclick="getVersion()">获取版本信息</li>
+				<li class="mui-table-view-cell" onclick="getArguments()">获取启动信息</li>
+				<li class="mui-table-view-cell" onclick="restartApp()">重启当前应用</li>
+	            <li class="mui-table-view-cell" onclick="getWidgetInfo()">获取当前应用的基本属性</li>
+				<li class="mui-table-view-cell" onclick="setBadge()">设置程序图标右上角数字</li>
+				<li class="mui-table-view-cell" onclick="clearBadge()">清除程序图标右上角数字</li>
+				<li class="mui-table-view-cell" onclick="exitApp()">退出当前应用</li>
+				<!--li class="mui-table-view-cell" onclick="updateApp()">WGTU Update</li-->
+			</ul>
+		</div>
+		<div id="output" class="bottomOutput">
+			Runtime管理程序运行时环境，可用于获取程序的各种信息、与第三方程序通讯等。
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			
+			//获取版本信息
+			function getVersion(){
+				//version: 客户端的版本号
+				//innerVersion: 客户端5+运行环境的版本号
+				outPut('.bottomOutput',"程序版本号："+plus.runtime.version+"<br/>内核版本号："+plus.runtime.innerVersion);
+			}
+			
+			//获取启动信息
+			function getArguments(){
+				//launcher: 应用启动来源
+				//arguments: 第三方程序调用时传递给程序的参数
+				outPut('.bottomOutput',"启动方式: "+plus.runtime.launcher+"<br/>启动参数: "+plus.runtime.arguments);
+			}
+			
+			//重启当前应用
+			function restartApp() {
+				//restart: 重启当前的应用
+				plus.runtime.restart();
+			}
+			
+			//获取当前应用的基本属性
+			function getWidgetInfo() {
+				//getProperty: 获取指定APPID对应的应用信息
+				//appid: 当前应用的APPID
+				plus.runtime.getProperty( plus.runtime.appid, function ( wgtinfo ) {
+					//appid属性,应用的APPID
+					var wgtStr = "appid:"+wgtinfo.appid;
+					//version属性,应用的版本号
+					wgtStr += "<br/>version:"+wgtinfo.version;
+					//name属性,应用的名称
+					wgtStr += "<br/>name:"+wgtinfo.name;
+					//description属性,应用描述信息
+					wgtStr += "<br/>description:"+wgtinfo.description;
+					//author属性,应用描述信息
+					wgtStr += "<br/>author:"+wgtinfo.author;
+					//email属性,开发者邮箱地址
+					wgtStr += "<br/>email:"+wgtinfo.email;
+					//licence属性,应用授权描述信息
+					wgtStr += "<br/>license:"+wgtinfo.license;
+					//licensehref属性,应用授权说明链接地址
+					wgtStr += "<br/>licensehref:"+wgtinfo.licensehref;
+					//features 属性,应用许可特性列表
+					wgtStr += "<br/>features:"+wgtinfo.features;
+					outPut('.bottomOutput', wgtStr );
+				} );
+			}
+			
+			//设置程序图标右上角数字
+			function setBadge() {
+				//设置程序快捷方式上显示的提示数字
+				plus.runtime.setBadgeNumber( 50 );
+				
+				outPut('.bottomOutput', "设置程序图标右上角显示的提示数字为50\n请返回桌面查看" );
+				
+				if(plus.os.name=="iOS"){
+					outPut('.bottomOutput', '*如果无法设置提示数字，请到"设置"->"通知"中配置应用在通知中心显示!' );
+				}else{
+					outPut('.bottomOutput', "注：仅支持小米(MIUI v5)，其它设备暂不支持此功能!" );
+				}
+			}
+			
+			//清除程序图标右上角数字
+			function clearBadge() {
+				
+				//设置程序快捷方式上显示的提示数字,参数为0则表示清除提示数字。
+				plus.runtime.setBadgeNumber( 0 );
+				outPut('.bottomOutput',  "清除程序图标右上角显示的提示数字\n请返回桌面查看" );
+				if(plus.os.name=="iOS"){
+					outPut('.bottomOutput',  '如果无法清除提示数字，请到"设置"->"通知"中配置应用在通知中心显示!' );
+				}else{
+					outPut('.bottomOutput',  "注：仅支持小米(MIUI v5)，其它设备暂不支持此功能!" );
+				}
+			}
+			
+			//退出当前应用
+			function exitApp(){
+				if(plus.os.name=="Android"){
+					//退出客户端程序
+					plus.runtime.quit();
+				}else{
+					outSet( "此平台不支持直接退出程序，请按Home键切换应用" );
+				}
+			}
+			
+			//WGTU Update
+			function updateApp(){
+				var url='http://demo.dcloud.net.cn/helloh5/update/HelloH5.wgtu';
+				plus.nativeUI.showWaiting("升级中...");
+				var dtask = plus.downloader.createDownload( url, {method:"GET"}, function(d,status){
+					if ( status == 200 ) { 
+						console.log( "Download wgtu success: " + d.filename );
+						plus.runtime.install(d.filename,{},function(){
+							plus.nativeUI.closeWaiting();
+							plus.nativeUI.alert("Update wgtu success, restart now!",function(){
+								plus.runtime.restart();
+							});
+						},function(e){
+							plus.nativeUI.closeWaiting();
+							alert("Update wgtu failed: "+e.message);
+						});
+					} else {
+						plus.nativeUI.closeWaiting();
+						 alert( "Download wgtu failed: " + status ); 
+					} 
+				} );
+				dtask.addEventListener('statechanged',function(d,status){
+					console.log("statechanged: "+d.state);
+				});
+				dtask.start();
+			}
+			
+			//调用第三方程序
+			
+			
+		</script>
+	</body>
+
+</html>

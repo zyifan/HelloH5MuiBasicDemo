@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<link href="../css/common.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">Proximity</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<br/>
+			<p class="des">距离传感器一般都在手机听筒的两侧或者是在手机听筒凹槽中，当有物体接近时（如将手机靠近耳朵接听或拨打电话），距离感应器可以检测并通知屏幕背景灯熄灭，拿开时再度点亮背景灯，这样可方便用户操作并节省电量。</p>
+			<br/>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" onclick="getProximity()">获取距离传感器信息</li>
+				<li class="mui-table-view-cell" onclick="watchProximity()">监听距离传感器变化</li>
+				<li class="mui-table-view-cell" onclick="watchStop()">停止监听</li>
+			</ul>
+		</div>
+		<div class="bottomOutput">
+			Proximity模块管理设备距离传感器，可获取当前设备的接近距离信息，通过plus.proximity可获取设备距离传感管理对象。
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			var ws=null;
+			document.addEventListener( "plusready", function(){
+				//watchProximity();
+				ws=plus.webview.currentWebview();
+				// 页面隐藏时自动停止监听
+				ws.addEventListener('hide',function(){
+					watchStop();
+				},false);
+			}, false );
+			
+			//获取设备当前距离传感器信息
+			function getProximity() {
+				outPut('.bottomOutput', "获取设备当前距离传感器信息" );
+				
+				//获取当前设备的接近距离信息
+				plus.proximity.getCurrentProximity( function ( d ) {
+					//d设备接近距离传感器获取的距离值，单位为厘米
+					outPut('.bottomOutput', "距离为：" + d );
+				}, function ( e ) {
+					outPut('.bottomOutput', "获取失败:" + e.message );
+				} );
+			}
+			
+			//监听设备接近距离的变化
+			var id=null,bright=null;
+			function watchProximity() {
+				if ( id ) {
+					return;
+				}
+				outPut('.bottomOutput', "监听设备距离传感器信息" );
+				
+				//获取屏幕亮度值
+				bright = plus.screen.getBrightness();
+				console.log(bright);
+				
+				//监听设备接近距离的变化
+				id = plus.proximity.watchProximity( function ( d ) {
+					outPut('.bottomOutput', "距离变化："+d );
+					plus.screen.setBrightness( (d<1)?0.01:0.5 );
+				}, function ( e ) {
+					//关闭监听设备接近距离变化
+					plus.proximity.clearWatch( id );
+					id = null;
+					outPut('.bottomOutput', "监听失败:" + e.message );
+				} );
+			}
+			
+			//停止监听设备距离传感器信息
+			function watchStop() {
+				if ( id ) {
+					outPut('.bottomOutput',"停止监听设备距离传感器信息" );
+					plus.proximity.clearWatch( id );
+					id = null;
+				} else {
+					outPut('.bottomOutput', "没有监听设备距离传感器" );
+				}
+			}
+		</script>
+	</body>
+
+</html>

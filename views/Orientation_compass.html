@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			#front {
+				width: 100%;
+				height: 40px;
+				text-align: center;
+				margin-top: 30px;
+			}
+			#container {
+				width: 80%;
+				position: relative;
+				margin: auto;
+				margin-top: 10px;
+				text-align: center;
+				line-height: 100%;
+				overflow: hidden;
+			}
+			#bg {
+				width: 100%;
+				position: absolute;
+				left: 0px;
+				top: 0px;
+				z-index: 0;
+			}
+			#compass {
+				width: 100%;
+				vertical-align: middle;
+			    /*
+				-webkit-transition: all 0.1s linear;
+				-moz-transform: rotate(45deg);
+				-webkit-transform: rotate(45deg);
+				-o-transform: rotate(45deg);
+				-ms-transform: rotate(45deg);
+				transform: rotate(45deg);
+				*/
+			
+			}
+			#inf {
+				width: 100%;
+				height: 40px;
+				line-height: 40px;
+				font-size: 32px;
+				font-weight: bold;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">指南针</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<div id="front">
+				<img style="height:100%;" src="../img/orientationa.png"/>
+			</div>
+			<div id="inf">
+				北0°
+			</div>
+			<div id="container">
+				<img id="bg" src="../img/orientationbg.png"/>
+				<img id="compass" src="../img/orientationc.png"/>
+			</div>
+			<div id="tip" style="width:100%;position:absolute;bottom:0;text-align:center;color:red"></div>
+		</div>
+		
+		<script src="../js/mui.min.js"></script>
+		<script src="../js/common.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			// H5 plus事件处理
+			function plusReady(){
+				// 锁定只能竖屏显示
+				plus.screen.lockOrientation( "portrait-primary" );
+			}
+			if(window.plus){
+				plusReady();
+			}else{
+				document.addEventListener("plusready",plusReady,false);
+			}
+			// 解锁并关闭
+			var _back=window.back;
+			function unlockback(){
+				plus.screen.unlockOrientation();
+				_back();
+			}
+			window.back=unlockback;
+			
+			var t,//指南针对象
+				x;//度数说明
+			var ld;
+			var tran="0.1s", empty="0s";
+			var bani=false, bsp=true;
+			
+			function update(d) {
+				var c = ld - d;
+				var ac = Math.abs(c);
+				if (ac <= 1) {
+					return;
+				} else if (ac > 180) {
+					if ( bani ) {
+						t.style.webkitTransitionDuration = empty;
+					}
+					ld = (c > 0) ? ld - 360 : ld + 360;
+					t.style.webkitTransform = "rotate(" + (bsp?(-ld):(ld)) + "deg)";
+					setTimeout(adjust, 1);
+				} else {
+					t.style.webkitTransform = "rotate(" + (bsp?(-d):(d)) + "deg)";
+				}
+				ld = d;
+				var r = Math.round(d);
+				var txt = "";
+				if (r >= 338 || r < 23) {
+					txt = "北";
+				} else if (r < 68) {
+					txt = "东北";
+				} else if (r < 113) {
+					txt = "东";
+				} else if (r < 158) {
+					txt = "东南";
+				} else if (r < 203) {
+					txt = "南";
+				} else if (r < 248) {
+					txt = "西南";
+				} else if (r < 293) {
+					txt = "西";
+				} else {
+					txt = "西北";
+				}
+				x.innerHTML = txt + r + "°";
+			}
+			function adjust() {
+				if ( bani ) {
+					t.style.webkitTransitionDuration = tran;
+				}
+				t.style.webkitTransform = "rotate(" + (bsp?(-ld):(ld)) + "deg)";
+			}
+			function gohome() {
+				plus.webview.currentWebview().close();
+			}
+			
+			document.addEventListener("plusready", function() {
+				t = document.getElementById("compass");//指南针对象
+				x = document.getElementById("inf");//度数说明
+			
+				if ( plus.os.name == "iOS" ) {
+					t.style.webkitTransition = "all 0.1s linear";
+					bani = true;
+					if ( plus.device.model.indexOf("iPhone") < 0 ) {
+						bsp = false;
+						document.getElementById("tip").innerText = "此设备方向数据不准确";
+					}
+				}
+				//获取当前设备的方向信息
+				plus.orientation.watchOrientation(function(r) {
+					//trueHeading: (float 类型 )设备方向与地球真实北极方向的角度
+					update(bsp?r.trueHeading:r.alpha);//update(r.alpha);
+				}, function(e) {
+					// error
+				}, {
+					frequency : 100
+				});
+			}, false);
+			// Adjective select.
+			document.onselectstart = function() {
+				return false;
+			}
+		</script>
+	</body>
+
+</html>

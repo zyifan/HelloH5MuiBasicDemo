@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">原生view过渡动画示例</h1>
+		</header>
+		<div class="mui-content mui-content-padded">
+			<p class="des">	使用nview来做转场动画，以及使用原生view做标题栏。	</p>
+			<button type="button" class="mui-btn mui-btn-yellow mui-btn-block" onclick="showWithWaiting()">演示</button>
+			<p class="des" style="font-weight:bold;text-indent:0;">	逻辑简述：</p>
+			<p class="des">
+				启动后先创建一个原生waiting界面，但不显示。
+				点击show按钮后，原生waiting做动画进来，同时然后创建一个带原生View控件导航栏的contentWebview加载网络页面，等titleUpdate后显示contentWebview并关闭原生waiting界面。
+			</p>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			var nWaiting,nTitle; // 原生view的等待界面和title
+			var touchX; // nWaiting的点击坐标的x数值
+			var backPressed; //返回箭头是否处于按下状态
+			var contentWebview=null; //准备打开网址的webview
+			var bitmap=null; // 返回图标
+			var topoffset=0;//顶部状态栏的高度
+			
+			// H5 plus事件处理
+			function plusReady(){
+				if(plus.navigator.isImmersedStatusbar()){// 兼容沉浸式状态栏模式
+					topoffset=Math.round(plus.navigator.getStatusbarHeight());
+				}
+				var bdata = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABYCAYAAAADWlKCAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAKwwAACsMBNCkkqwAAABZ0RVh0Q3JlYXRpb24gVGltZQAwOS8xMi8xM5w+I3MAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAACcklEQVR4nO3a0XESURiG4TeO99iBWoGZ+RvADtKBpAPtwBLsANJBrEAs4MyYDmIHSQXkgk0mMLK7ILt8/+F778ici394OGfDsher1Qqn05tTD+A2M4hYBhHLIGIZRCyDiGUQsQwilkHEMohYBhHLIGIZRCyDiGUQsQwilkHEMohYBhHLIGIZRCyDiGUQsQwilkHEMohYb089wNCVUq6Ay+blfUQsTjhOZxc1P9tbSlkAX7b+/C0ifpxgnF5Ve2TtwAD4OvIoe1UlSAsGwPsRR9m76kA6MAD+jjTKQVUF0gMD4HaEUQ6umot6T4ybiJgNP83hVbFDasGACnZIT4yfEXE1wjj/Xeod0hPjDpgNPsyRSguyB8Y0Ih6Gn+g4pQSpFQMSgtSMAclAaseARCDngAFJQM4FAxKAnBMGiH8xLKVMgV89ln6MiPthpxkn6R0SEUvgusfSZSnlsnuZftI75LlSygyYdyx7ZH1s/Rl+ouFKAQIvx9ctMGlZlh4lDQhAcywtqRhF+hqyXfMmT1m/6buasL6mzMaY6dilAoENlLuWZRNgnhEl1ZH1ulLKO9bH16eOpdfqz2K9Lt0Oea75EjilfadAsp2SFgQ2UH53LJ2XUr4PPtARSntkbVfL7+rVgEBvlM/NHQDJUh9Z2zWf/puOZbPhJzm8qkDgBaXt/teHcSY5rOpAAJp/c/vclJSrShDYifKI+NPvVV3U/1VzU3LavFyo/25SPUi2qj2ysmYQsQwilkHEMohYBhHLIGIZRCyDiGUQsQwilkHEMohYBhHLIGIZRCyDiGUQsQwilkHEMohYBhHLIGIZRCyDiGUQsZ4Ak9fPFwUy/HsAAAAASUVORK5CYII=';
+				//Bitmap: 原生图片对象，创建Bitmap对象，创建后为空Bitmap对象，需要调用Webview对象的draw方法更新，或者调用load/loadBase64Data方法加载图片
+				bitmap = new plus.nativeObj.Bitmap('back');
+				// 加载Base64编码格式图片到Bitmap对象
+				bitmap.loadBase64Data(bdata, function(){
+					bitmap.isLoadSuccess = true;
+					//drawBitmap: 当前View控件之上绘制指定的图片，如果图片无效则不做任何操作
+					nWaiting&&nWaiting.drawBitmap(bitmap,null,{
+						top:topoffset+'px',
+						left:'0px',
+						width:'44px',
+						height:'44px'
+						},'backicon');
+					console.log('Back bitmap load success');
+				}, function(e){
+					console.log('Back bitmap load failed: '+JSON.stringify(e));
+				});
+				
+				//创建nWaiting，创建原生等待View控件
+				creatWaiting();
+			}
+			
+			//处理plusready事件
+			if(window.plus){
+				plusReady();
+			}else{
+				document.addEventListener('plusready',plusReady,false);
+			}
+			
+			// 创建原生View控件
+			function creatWaiting(){
+				console.log('creatWaiting: '+topoffset);
+				//判断view是否已存在，避免重复创建，尤其调试刷新网页时很容易触发重复创建 
+				//getViewById：获取指定标识的View控件对象
+				nWaiting = plus.nativeObj.View.getViewById('nWaiting');
+				
+				if(nWaiting){
+					return;
+				}
+				
+				//创建View对象
+				nWaiting = new plus.nativeObj.View('nWaiting',{top:'0px',left:'0px',height:'100%',width:'100%'});
+				
+				//是否拦截View控件的触屏事件
+				nWaiting.interceptTouchEvent(true);
+				
+				//初始化绘制nwaiting界面，绘制矩形区域，回执标题栏
+				nWaiting.drawRect('#D74B28',{
+					top:'0px',
+					left:'0px',
+					height:(topoffset+44)+'px',
+					width:'100%'
+				}) //绘制title背景色
+				
+				//drawBitmap: 当前View控件之上绘制指定的图片，如果图片无效则不做任何操作
+				//绘制返回图标
+				bitmap&&bitmap.isLoadSuccess&&nWaiting.drawBitmap(bitmap,null,{
+					top:topoffset+'px',
+					left:'0px',
+					width:'44px',
+					height:'44px'
+				},'backicon');
+				
+				//绘制文本
+//				nWaiting.drawText( '标题', {
+//					top:topoffset+'px',
+//					left:'0px',
+//					width:'100%',
+//					height:'44px'
+//				}, {
+//					size:'17px',
+//					color:'#CCCCCC'
+//				});
+				//绘制等待内容区背景色
+//				nWaiting.drawRect('#EEEEEE',{
+//					top:(topoffset+44)+'px',
+//					left:'0px',
+//					width:'100%'
+//				}) 
+				//绘制等待区的文本
+				nWaiting.drawText( '加 载 中 ...', {
+					top:(topoffset+44)+'px',
+					left:'0px',
+					width:'100%',
+					height:'50%'
+				}, {size:'12px',color:'rgb(100,100,100)'});
+			}
+			
+			// 更新窗口导航栏 
+			function updateNavigationbar(){
+				//获取Webview窗口的导航栏控件对象
+				nTitle = contentWebview.getNavigationbar();
+				//是否拦截Webview窗口的触屏事件
+				nTitle.interceptTouchEvent(true);
+				
+				// 处理touchstart、touchmove、touchend事件，实现下效果 
+			//	nTitle.addEventListener('touchstart', function(e){
+			//		console.log('touchstart'+e.pageX);
+			//		touchX = e.pageX;
+			//		if(touchX>0 && touchX<44){
+			//			nTitle.drawRect('#e7e7e7', {top:topoffset+'px',left:'0px',width:'44px',height:'44px'}, 'backbg');
+			//			backPressed=true;
+			//		}
+			//	});
+			//	nTitle.addEventListener('touchmove', function(e){
+			//		console.log('touchmove'+e.pageX);
+			//		touchX = e.pageX;
+			//		if(touchX>44 && backPressed){
+			//			nTitle.drawRect('#f7f7f7', {top:topoffset+'px',left:'0px',width:'44px',height:'44px'}, 'backbg');
+			//			backPressed=false;
+			//		}
+			//	});
+			//	nTitle.addEventListener('touchend', function(e){
+			//		console.log('touchend'+e.pageX);
+			//		if(backPressed){
+			//			nTitle.drawRect('#f7f7f7', {top:topoffset+'px',left:'0px',width:'44px',height:'44px'}, 'backbg');
+			//			backPressed=false;
+			//		}
+			//	});
+			
+				// 处理点击事件,为返回按钮添加点击返回事件
+				nTitle.addEventListener('click', function(e){
+					touchX = e.pageX;
+					if(touchX>3 && touchX<44){
+						back();
+					}
+				});
+				//补充绘制nTitle界面
+				nTitle.drawBitmap(bitmap, null, {
+					top:'0px',left:'0px',width:'44px',height:'44px'
+				}, 'backicon'); // 绘制返回箭头
+			}
+			
+			// 使用原生View控件作为动画模板显示窗口 
+			function showWithWaiting(){
+				var bShow=bUpdate=false;
+				
+				//创建新的Webview窗口
+				contentWebview = plus.webview.create('http://www.baidu.com', 'contendWebview', {
+					navigationbar:{backgroundColor:'#D74B28',titletText:'标题',titleColor:'#CCCCCC'}
+				});
+				
+				// 更新Webview的原生头内容
+				updateNavigationbar();//setTimeout(updateNavigationbar, 100);
+				
+				//监听Webview窗口关闭事件
+				contentWebview.addEventListener('close', function(){
+					contentWebview=null;
+				});
+				//监听Webview加载页面标题更新事件
+				contentWebview.addEventListener('titleUpdate', function(){
+					bUpdate=true;
+					bShow&&nWaiting.hide();
+				}, false);
+				
+				//监听Webview窗口页面加载完成事件
+				contentWebview.addEventListener('loaded', function(){// 兼容titleUpdate事件不触发的情况
+					bUpdate||(bUpdate=true,bShow&&nWaiting.hide());
+				}, false);
+				
+				//监听Webview窗口页面加载完成事件
+				contentWebview.addEventListener('error', function(e){// 兼容titleUpdate事件不触发的情况
+					console.log('error: '+e.Message);
+				}, false);
+				
+				//显示Webview窗口，加上nWaiting控件
+				contentWebview.show('pop-in', null, function(){
+					bShow=true;
+					//hide：隐藏View控件
+					bUpdate&&nWaiting.hide();
+				}, {//显示Webview窗口扩展参数
+					capture:nWaiting//窗口动画加速时使用的图片
+				});
+			}
+			// 处理返回事件
+			window.back=function(hide){
+				if(window.plus){
+					ws||(ws=plus.webview.currentWebview());
+					if(hide||ws.preate){
+						ws.hide('auto');
+					}else{
+						ws.close('auto');
+					}
+				}else if(history.length>1){
+					history.back();
+				}else{
+					window.close();
+				}
+			};
+			
+			// 重写返回处理
+			var _back=window.back;
+			function safeback(){
+				//close: 关闭Webview窗口
+				//bitmap.clear(),clear: 销毁Bitmap图片
+				contentWebview?contentWebview.close('pop-out'):(bitmap&&bitmap.clear(),nWaiting&&nWaiting.clear(),_back());
+			}
+			window.back=safeback;
+		</script>
+	</body>
+
+</html>

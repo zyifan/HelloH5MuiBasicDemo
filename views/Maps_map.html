@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.ipos {
+				background: no-repeat center center url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAsCAYAAAAn4+taAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABZ0RVh0Q3JlYXRpb24gVGltZQAwNC8wMS8xNExYUU4AAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzbovLKMAAACTklEQVRoge2YO2gUURSGv7PjEkULO4UoFooIFgtzprAPWMiWKewSTadgYWEhBjHCloGUQtYHaGEjGAQtUmgnZO9YpsqC2NgYIwjRInMscoPrYkzhGTIs8zdnzoP578ewM/eumBmjoMZ+L8BLNUjVVINUTTVI1VSDVE0jA3KgjJuGEE6LyI2iKC6JyBkzWxORF8ADVV0rw1O891ohhCngPnDyL+1PZjabZdkTV1OcQUIIV4CHMf0JvAK+A0eANjAWe1dV9ZGbMY6/kTzPzwHzMV0VkZaqTgLTqjopIi1gNfbnQwhnvbzBEcTMbgFHgXURaRdFsRFCWAa+hhCWi6LYEJE2sB7nbnp5g+9b62KMIU3Tvoh0gQm2Fz0hIt00TftAADCztqO3K8h4jJsAZnZ+sDmQ/wAQkXEc5QnyJcZjACLybLApIk/j5YmheRd5gryLMev1elOqesfMrpvZczO7pqqzvV5vGmgNzbvIDUREXsbLRES6IYTbzWZzMcuyy0mSPA4h3BWRxR3PgXkff6/vSJ7nx83sPXBqoLwJFEACHByofxSRC2mafnYxx/GJxEW9GSofAg7zJwTAa08I8N80doG9HrHx++vvJlcQVV0xs6V/zZjZkqquePpCOdv4OWBrl96WiNwrwdMfJMuyHFjYpb2gqh+8PaG8g9Uc0B+q9WO9FJUCoqrfgBm2X73EOBPrpai0o66qvgU6Me3EvDSVctTdUZIknaIoxhqNRmfv6f+T+1F3vzQy/6LUIFVTDVI11SBVUw1SNdUgVdPIgPwCtt+2JPQRVicAAAAASUVORK5CYII=);
+				background-size: 50px 44px;
+				display: inline-block;
+				height:100%;
+				width:40px;
+				cursor: pointer;
+			}
+			#map {
+				width: 100%;
+				position: fixed;
+				top: 45px;
+				bottom: 0px;
+				line-height: 200px;
+				text-align: center;
+				background: #FFFFFF;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <a class="mui-icon mui-pull-right ipos" onclick="userLocation();"></a>
+		    <h1 class="mui-title">应用内置地图</h1>
+		</header>
+		<div class="mui-content" id="map">
+			<p style="text-align: center;margin: 50px 0 0 0;">地图加载中……</p>
+		</div>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				subpages:[{
+			      url:'Maps_map_sub.html',//子页面HTML地址，支持本地地址和网络地址
+			      id:'Maps_map_sub.html',//子页面标志
+			      styles:{
+			        top:'48px',//子页面顶部位置
+			        bottom:'0px',//子页面底部位置
+			        height:'60px',
+			        position:'absolute',
+			        scrollIndicator:'none',
+			        background:'transparent'
+			      }
+			    }]
+			})
+			var ws=null,//获取当前窗口的WebviewObject对象
+				wo=null;//获取当前Webview窗口的创建者
+			var em=null,//
+				map=null,//地图控件对象
+				pcenter=null;//Point对象
+				
+				// DOMContentloaded事件处理
+			document.addEventListener("DOMContentLoaded",function(){
+				em=document.getElementById("map");
+			},false);
+			
+			mui.plusReady(function(){
+				if(!em||ws){
+					return
+				};
+				// 获取窗口对象，获取当前窗口的WebviewObject对象
+				ws=plus.webview.currentWebview();
+				// 获取当前Webview窗口的创建者，在这里为Maps.html
+				wo=ws.opener();
+				
+				//高德地图坐标为(116.3974357341,39.9085574220), 百度地图坐标为(116.3975,39.9074)
+				//Point对象用于表示地图元素的坐标，常用语对地图上元素进行定位时使用，Point(lng,lat): 创建Point对象
+				pcenter = new plus.maps.Point(116.3975,39.9074);
+				
+//				setTimeout(function(){
+					//地图控件对象，Map(id,options): 创建Map对象
+					//id: ( String ) 必选 地图控件所占位的DOM节点（通常为div）的id
+					//options: ( MapOptions ) 可选 地图控件的初始化参数
+					map=new plus.maps.Map("map");
+					
+					//设置地图初始中心点和缩放级别
+					//center: ( Point ) 必选 地图初始化的中心点坐标
+					//zoom: ( Number ) 必选 地图初始化的缩放级别
+					map.centerAndZoom(pcenter,12);
+					
+					//为地图添加标点
+					createMarker();
+					
+//				},300);
+				
+				// 显示页面并关闭等待框
+			    ws.show("pop-in");
+			})
+			//
+			function createMarker(){
+				//高德地图坐标为(116.3406445236,39.9630878208), 百度地图坐标为(116.347292,39.968716
+				//地图上显示的标点对象,创建地图标点Marker对象
+				var marker=new plus.maps.Marker(new plus.maps.Point(116.347292,39.968716));
+				
+				//设置标点上显示的图标
+				marker.setIcon("/logo.png");
+				//设置标点上显示的文本标注
+				marker.setLabel("HBuilder");
+				//地图上显示的气泡对象,此对象不能直接添加到地图上显示，只可关联到地图标点覆盖物上，用户点击标点时弹出显示
+				var bubble = new plus.maps.Bubble("打造最好的HTML5移动开发工具");
+				//设置标点的气泡内容
+				marker.setBubble(bubble);
+				// 向地图中添加覆盖物
+				map.addOverlay(marker);
+			}
+			
+			//重置地图
+			function resetMap(){
+				//map.centerAndZoom(pcenter,12);
+				map.reset();
+			}
+			//获取用户当前的位置
+			function userLocation(){
+				//将在地图上显示用户位置信息
+				map.showUserLocation( true );
+				//获取用户的当前位置信息
+				map.getUserLocation(function(state,pos){
+					//state获取用户位置操作状态码，0表示成功，其它为错误码
+					//pos位置经纬度坐标，如果获取操作失败则为null对象
+					if(0==state){
+						//设置地图的中心点
+						map.setCenter(pos);
+					}
+				});
+			}
+			
+		</script>
+	</body>
+
+</html>

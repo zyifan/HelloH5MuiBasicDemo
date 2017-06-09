@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="../css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body style="background: none;">
+		<button type="button" style="width:100px;margin: auto;height: 40px;line-height: 40px;padding-top:0px;padding-bottom: 0px;font-size: 15px;" class="mui-btn mui-badge-yellow mui-btn-block" onclick="resetMap()">重置</button>
+		<script src="../js/mui.min.js"></script>
+		<script type="text/javascript">
+			function resetMap(){
+				plus.webview.currentWebview().opener().evalJS('resetMap()');
+			}
+		</script>
+	</body>
+
+</html>
